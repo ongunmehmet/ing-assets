@@ -17,8 +17,8 @@ public class JwtUtil {
 
     private final String SECRET_KEY = "mySuperSecretKey123456789012345678";
 
-    // Method to generate JWT token
-    private long jwtExpirationDate = 3600000; //1h = 3600s and 3600*1000 = 3600000 milliseconds
+
+    private long jwtExpirationDate = 3600000;
 
     public String generateToken(Authentication authentication) {
 
@@ -40,7 +40,7 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
     }
 
-    // extract username from JWT token
+
     public String getUsername(String token){
 
         return Jwts.parser()
@@ -51,7 +51,7 @@ public class JwtUtil {
                 .getSubject();
     }
 
-    // validate JWT token
+
     public boolean validateToken(String token){
         Jwts.parser()
                 .verifyWith((SecretKey) key())

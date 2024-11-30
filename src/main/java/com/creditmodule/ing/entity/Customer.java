@@ -1,6 +1,7 @@
 package com.creditmodule.ing.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -27,6 +28,7 @@ public class Customer {
     private Long usedCreditLimit;
 
     @OneToOne
+    @JsonIgnore
     @MapsId
     @JoinColumn(name = "user_id")
     private User user;
