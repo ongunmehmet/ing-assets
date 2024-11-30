@@ -52,4 +52,20 @@ public class UserCustomerService {
         userRepository.save(user);
             return  user.getAccountNumber();
     }
+
+    public Customer findCustomerById(Long id) {
+       return customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+    }
+
+    public Long findCustomerIdByAccountNumber(String accountNumber) {
+        Customer customer = customerRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+        return customer.getId();
+    }
+
+    public Customer findCustomerWithAccountNumber(String accountNumber) {
+        return  customerRepository.findByAccountNumber(accountNumber)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+    }
 }

@@ -1,16 +1,20 @@
 package com.creditmodule.ing.data;
 
-import com.creditmodule.ing.annotation.ValidateInstallment;
+import com.creditmodule.ing.entity.Loan;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.annotation.Nullable;
 import lombok.Data;
 
 import java.util.Date;
+
 @Data
-public class CreateLoanRequest {
-    private String accountNumber;
+public class CreateLoanResponse {
+    @Nullable
+    private Long customerId;
     private Long loanAmount;
-    @ValidateInstallment
+    private double totalPayment;
     private int numberOfInstallment;
     @JsonFormat(pattern = "dd-MM-yyyy")
     private Date createDate;
+    private Loan loan;
 }

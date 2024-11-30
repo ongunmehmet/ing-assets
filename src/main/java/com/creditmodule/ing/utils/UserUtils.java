@@ -1,8 +1,13 @@
 package com.creditmodule.ing.utils;
 
+import com.creditmodule.ing.data.CustomUserDetails;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 
+import java.util.Collection;
+@Component
 public class UserUtils {
 
     public String getCurrentUsername() {
@@ -17,5 +22,10 @@ public class UserUtils {
 
         // If principal is not a UserDetails object, return null or handle accordingly
         return null;
+    }
+    public boolean hasAdminRole() {
+        // Check if the current authenticated user has the 'ADMIN' role
+        Collection<? extends GrantedAuthority> authorities = ((CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getAuthorities();
+        return authorities.stream().anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
     }
 }

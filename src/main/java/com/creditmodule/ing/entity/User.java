@@ -42,5 +42,4 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL) // Bidirectional mapping
     private Customer customer;
 
-    // Getters and setters
 }
