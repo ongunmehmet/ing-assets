@@ -3,6 +3,7 @@ package com.creditmodule.ing.service;
 import com.creditmodule.ing.data.CustomUserDetails;
 import com.creditmodule.ing.entity.User;
 import com.creditmodule.ing.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,8 +16,8 @@ import java.util.stream.Collectors;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-
-    private final UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     public CustomUserDetailsService(UserRepository userRepository) {
         this.userRepository = userRepository;

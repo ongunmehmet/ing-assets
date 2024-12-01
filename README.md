@@ -1,7 +1,12 @@
-# API Documentation
+# Application Run and API Documentation
 
 This document provides details about the API endpoints available in the application.
 
+### Prerequisites
+Before getting started, ensure you have the following installed:
+
+1-Docker
+2-Docker Compose
 ---
 ## Getting Started Local
 ```bash
@@ -11,20 +16,16 @@ Then start IngApplication.java
 
 Then copy curls form curlList.txt and copy your postman
 1-register
-2-login #use recived token as barer token for all request
+2-login #use received token as barer token for all request
 3-crete a loan and
 4-Make payment
+5-For admin role change one of records role to admin from users table
 
 ## For API API Documentation
 After run application.
 - [Swagger UI - API Documentation](http://localhost:8080/swagger-ui/index.html#/)
 ## Getting Started with Docker
 
-### Prerequisites
-Before getting started, ensure you have the following installed:
-
-1-Docker
-2-Docker Compose
 
 ### Step 1: Build the Application
 
