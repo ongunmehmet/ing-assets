@@ -1,6 +1,7 @@
 package com.creditmodule.ing.config;
 
 import com.creditmodule.ing.entity.Customer;
+import com.creditmodule.ing.exceptions.CustomAccessDeniedHandler;
 import com.creditmodule.ing.service.CustomUserDetailsService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -47,7 +48,9 @@ public class SecurityConfig {
                 }).httpBasic(Customizer.withDefaults());
 
         http.exceptionHandling( exception -> exception
-                .authenticationEntryPoint(authenticationEntryPoint));
+                .authenticationEntryPoint(authenticationEntryPoint)
+                .accessDeniedHandler(new CustomAccessDeniedHandler()));
+
 
         http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
