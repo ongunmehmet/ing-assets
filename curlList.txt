@@ -1,0 +1,42 @@
+curl --location --request POST 'http://localhost:8080/api/auth/register' \
+--header 'Content-Type: application/json' \
+--header 'Cookie: JSESSIONID=C0B8A1E733379E2DFD2C4BAB002B1973' \
+--data-raw '{
+  "password": "123456",
+  "name":"admin",
+  "surname": "admin",
+  "creditLimit": 9999999
+}'
+
+curl --location --request POST 'http://localhost:8080/api/auth/login' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "accountNumber": "6b1d3ca4-0442-466c-ad22-508d90abbbb9",
+  "password": "123456"
+}'
+
+curl --location --request GET 'http://localhost:8080/v1/customers/2' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJlZTY0MzRlMS0wNWRhLTQ2MmUtYmFmZi05NTk2OGJhN2RhZmQiLCJpYXQiOjE3MzMwMDY0NjUsImV4cCI6MTczMzAxMDA2NX0.tqr1amzjpfRjAzw_kb6xEsKCvXZvAUnKgMxxiDfXoy0' \
+--data-raw ''
+
+
+curl --location --request POST 'http://localhost:8080/v1/loan/createLoan' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2YjFkM2NhNC0wNDQyLTQ2NmMtYWQyMi01MDhkOTBhYmJiYjkiLCJpYXQiOjE3MzMwNzEyNjgsImV4cCI6MTczMzA3NDg2OH0.VdkV_BWfjI94im4DCU47gKYYPyEaiOL_1YaOwg7cMsw' \
+--header 'Content-Type: application/json' \
+--header 'Cookie: JSESSIONID=C0B8A1E733379E2DFD2C4BAB002B1973' \
+--data-raw '{
+  "accountNumber": "6b1d3ca4-0442-466c-ad22-508d90abbbb9",
+  "loanAmount": "2000",
+  "numberOfInstallment": "6",
+  "createDate": "30-11-2024"
+}'
+
+curl --location --request POST 'http://localhost:8080/v1/loanInstallments/payloaninstallment' \
+--header 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjY2JhMDdmMi0wN2JlLTQyMDUtYmM1Yi00NzZjZWJmNjc5OWIiLCJpYXQiOjE3MzMwNjY5NjMsImV4cCI6MTczMzA3MDU2M30.0_1ySK6d0iyPg32ENvgCQW6C8prdzFrI1buoeYu7Njc' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "amount": 1000,
+  "paymentDate": "03-12-2024",
+  "accountNumber": "ccba07f2-07be-4205-bc5b-476cebf6799b",
+  "loanId": 1
+}'

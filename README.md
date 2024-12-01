@@ -3,6 +3,21 @@
 This document provides details about the API endpoints available in the application.
 
 ---
+## Getting Started Local
+```bash
+docker-compose -f docker-compose-localdb.yml up -d
+```
+Then start IngApplication.java 
+
+Then copy curls form curlList.txt and copy your postman
+1-register
+2-login #use recived token as barer token for all request
+3-crete a loan and
+4-Make payment
+
+## For API API Documentation
+After run application.
+- [Swagger UI - API Documentation](http://localhost:8080/swagger-ui/index.html#/)
 ## Getting Started with Docker
 
 ### Prerequisites

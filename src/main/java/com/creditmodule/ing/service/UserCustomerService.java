@@ -21,7 +21,6 @@ public class UserCustomerService {
 
     private final UserRepository userRepository;
     private final CustomerRepository customerRepository;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -70,3 +69,5 @@ public class UserCustomerService {
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
     }
 }
+
+
