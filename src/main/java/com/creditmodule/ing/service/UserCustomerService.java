@@ -4,14 +4,14 @@ import com.creditmodule.ing.data.UserCustomerCreateRequest;
 import com.creditmodule.ing.entity.Customer;
 import com.creditmodule.ing.entity.User;
 import com.creditmodule.ing.enums.Role;
+import com.creditmodule.ing.exceptions.ResourceNotFoundException;
 import com.creditmodule.ing.repository.CustomerRepository;
 import com.creditmodule.ing.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,13 +21,14 @@ public class UserCustomerService {
 
     private final UserRepository userRepository;
     private final CustomerRepository customerRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-
+    @Transactional
     public String createUserAndCustomer(UserCustomerCreateRequest request) {
         // Create User
         User user = new User();
-        user.setUsername(request.getUsername());
+        user.setUsername(request.getSurname());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRoles(Set.of(Role.CUSTOMER)); // Default role: CUSTOMER
         user.setAccountNumber(UUID.randomUUID().toString());
@@ -55,17 +56,17 @@ public class UserCustomerService {
 
     public Customer findCustomerById(Long id) {
        return customerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
     }
 
     public Long findCustomerIdByAccountNumber(String accountNumber) {
         Customer customer = customerRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
         return customer.getId();
     }
 
     public Customer findCustomerWithAccountNumber(String accountNumber) {
         return  customerRepository.findByAccountNumber(accountNumber)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
     }
 }

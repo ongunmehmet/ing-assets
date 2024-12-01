@@ -5,6 +5,7 @@ import com.creditmodule.ing.data.PaymentResponse;
 import com.creditmodule.ing.entity.Customer;
 import com.creditmodule.ing.entity.Loan;
 import com.creditmodule.ing.entity.LoanInstallment;
+import com.creditmodule.ing.exceptions.ResourceNotFoundException;
 import com.creditmodule.ing.repository.CustomerRepository;
 import com.creditmodule.ing.repository.LoanInstallmentRepository;
 import com.creditmodule.ing.repository.LoanRepository;
@@ -38,11 +39,11 @@ public class LoanInstallmentService {
     @Transactional
     public PaymentResponse payLoanInstalments(PaymentRequest payment) {
         Customer customer = customerRepository.findByAccountNumber(payment.getAccountNumber())
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
         List<Loan> customerLoans = customer.getLoans();
         Loan requestedLoan = customerLoans.stream()
                 .filter(loan -> loan.getId().equals(payment.getLoanId()))
-                .findFirst().orElseThrow(() -> new RuntimeException("Loan not found "));
+                .findFirst().orElseThrow(() -> new ResourceNotFoundException("Loan not found "));
         List<LoanInstallment> unpaidInstallments = requestedLoan.getLoanInstallments().stream()
                 .filter(installment -> installment.getIsPaid() == null || !installment.getIsPaid())
                 .sorted(Comparator.comparing(LoanInstallment::getDueDate))

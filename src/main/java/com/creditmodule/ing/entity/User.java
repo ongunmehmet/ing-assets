@@ -17,7 +17,7 @@ import jakarta.persistence.Table;
 import lombok.Data;
 
 import java.util.Set;
-import java.util.UUID;
+
 
 @Entity
 @Table(name = "users")
@@ -33,8 +33,6 @@ public class User {
     private String username;
 
     private String password;
-
-    private boolean enabled;
 
     @Enumerated(EnumType.STRING)
     private Set<Role> roles;

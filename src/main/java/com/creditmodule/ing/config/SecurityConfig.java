@@ -1,7 +1,6 @@
 package com.creditmodule.ing.config;
 
 import com.creditmodule.ing.entity.Customer;
-import com.creditmodule.ing.exceptions.CustomAccessDeniedHandler;
 import com.creditmodule.ing.service.CustomUserDetailsService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -48,9 +47,7 @@ public class SecurityConfig {
                 }).httpBasic(Customizer.withDefaults());
 
         http.exceptionHandling( exception -> exception
-                .authenticationEntryPoint(authenticationEntryPoint)
-                .accessDeniedHandler(new CustomAccessDeniedHandler()));
-
+                .authenticationEntryPoint(authenticationEntryPoint));
 
         http.addFilterBefore(authenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -61,4 +58,10 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
+    private static final String[] AUTH_WHITELIST={
+            "/swagger-ui/**",
+            "/swagger-ui.html",
+            "/v3/api-docs/**",
+            "/v3/api-docs.yaml"
+    };
 }

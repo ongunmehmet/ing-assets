@@ -5,7 +5,12 @@ import com.creditmodule.ing.data.UserCustomerCreateRequest;
 
 import com.creditmodule.ing.service.UserCustomerService;
 import com.creditmodule.ing.utils.JwtUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,6 +27,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Authentication", description = "Endpoints for authentication and user registration")
 public class AuthController {
 
     @Autowired
@@ -34,8 +40,13 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Operation(summary = "Login", description = "Authenticate a user and return a JWT token")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Successfully authenticated"),
+            @ApiResponse(responseCode = "401", description = "Invalid credentials")
+    })
     @PostMapping("/login")
-    public String login(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<String> login(@RequestBody AuthRequest authRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         authRequest.getAccountNumber(), authRequest.getPassword()
@@ -47,16 +58,21 @@ public class AuthController {
 
         String token = jwtUtil.generateToken(authentication);
 
-        return token;
+        return ResponseEntity.ok(token);
     }
 
+    @Operation(summary = "Register User and Customer", description = "Create a new user and associated customer")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User and Customer created successfully"),
+            @ApiResponse(responseCode = "400", description = "Validation error")
+    })
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> registerUserAndCustomer(@RequestBody UserCustomerCreateRequest request) {
         String accountNumber= userCustomerService.createUserAndCustomer(request);
         Map<String, String> response = new HashMap<>();
         response.put("message", "User and Customer created successfully.Please save your account number");
         response.put("accountNumber", accountNumber);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }
 
