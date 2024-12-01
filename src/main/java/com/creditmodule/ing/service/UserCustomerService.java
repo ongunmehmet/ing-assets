@@ -25,36 +25,33 @@ public class UserCustomerService {
 
     @Transactional
     public String createUserAndCustomer(UserCustomerCreateRequest request) {
-        // Create User
         User user = new User();
         user.setUsername(request.getSurname());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRoles(Set.of(Role.CUSTOMER)); // Default role: CUSTOMER
+        if (customerRepository.findAll().size() == 0) {
+            user.setRoles(Set.of(Role.ADMIN));
+        } else {
+            user.setRoles(Set.of(Role.CUSTOMER));
+        }
         user.setAccountNumber(UUID.randomUUID().toString());
 
-        // Create Customer
         Customer customer = new Customer();
         customer.setName(request.getName());
         customer.setSurname(request.getSurname());
         customer.setCreditLimit(request.getCreditLimit());
         customer.setUsedCreditLimit(0L);
 
-        // Manually set the shared ID
-        customer.setId(user.getId());  // This ensures Customer has the same ID as User
-
-        customer.setUser(user);  // Set the bi-directional relationship
-
-        // Save Customer first (since User's ID will be set after persisting)
+        customer.setId(user.getId());
+        customer.setUser(user);
         customerRepository.save(customer);
 
-        // Save User with the customer relationship
         user.setCustomer(customer);
         userRepository.save(user);
-            return  user.getAccountNumber();
+        return user.getAccountNumber();
     }
 
     public Customer findCustomerById(Long id) {
-       return customerRepository.findById(id)
+        return customerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
     }
 
@@ -65,7 +62,7 @@ public class UserCustomerService {
     }
 
     public Customer findCustomerWithAccountNumber(String accountNumber) {
-        return  customerRepository.findByAccountNumber(accountNumber)
+        return customerRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
     }
 }

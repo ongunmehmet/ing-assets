@@ -68,7 +68,7 @@ public class AuthController {
     })
     @PostMapping("/register")
     public ResponseEntity<Map<String, String>> registerUserAndCustomer(@RequestBody UserCustomerCreateRequest request) {
-        String accountNumber= userCustomerService.createUserAndCustomer(request);
+        String accountNumber = userCustomerService.createUserAndCustomer(request);
         Map<String, String> response = new HashMap<>();
         response.put("message", "User and Customer created successfully.Please save your account number");
         response.put("accountNumber", accountNumber);

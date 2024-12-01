@@ -117,6 +117,6 @@ public class LoanInstallmentServiceTest {
         // Assert:
         assertNotNull(response);
         assertEquals(0, response.getNumberOfPaidInstallments());
-        assertEquals(500.0, response.getRefundAmount()); // Refund the entire payment
+        assertEquals(500.0, response.getRefundAmount());
     }
 }

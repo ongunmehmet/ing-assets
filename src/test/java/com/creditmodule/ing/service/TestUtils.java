@@ -25,6 +25,7 @@ public class TestUtils {
         customer.setUser(createMockUser());
         return customer;
     }
+
     public static Customer createMockCustomer(List<Loan> loan) {
         Customer customer = new Customer();
         customer.setId(1L);
@@ -35,7 +36,8 @@ public class TestUtils {
         customer.setLoans(loan);
         return customer;
     }
-    public static User createMockUser(){
+
+    public static User createMockUser() {
         User user = new User();
         user.setAccountNumber("123456");
         user.setUsername("testuser");
@@ -43,6 +45,7 @@ public class TestUtils {
         user.setRoles(Set.of(Role.ADMIN));
         return user;
     }
+
     public static Loan createMockLoan() {
         Loan loan = new Loan();
         loan.setId(1L);
@@ -79,7 +82,8 @@ public class TestUtils {
         request.setCreditLimit(10000L);
         return request;
     }
-    public static CreateLoanRequest createMockLoanRequest (){
+
+    public static CreateLoanRequest createMockLoanRequest() {
         CreateLoanRequest request = new CreateLoanRequest();
         request.setAccountNumber("123456");
         request.setLoanAmount(5000L);

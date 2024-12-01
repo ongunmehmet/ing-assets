@@ -36,6 +36,7 @@ public class CustomerController {
         return ResponseEntity.ok(customer);
 
     }
+
     @Operation(summary = "Get Customer ID by Account Number", description = "Retrieve a customer's ID using their account number")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Customer ID retrieved"),
@@ -47,6 +48,7 @@ public class CustomerController {
         Long customerId = userCustomerService.findCustomerIdByAccountNumber(accountNumber);
         return ResponseEntity.ok(customerId);
     }
+
     @Operation(summary = "Get Customer by Account Number", description = "Retrieve a customer's details using their account number")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Customer found"),

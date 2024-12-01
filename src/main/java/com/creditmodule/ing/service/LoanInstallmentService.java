@@ -25,9 +25,10 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Slf4j
 public class LoanInstallmentService {
-    private  LoanInstallmentRepository loanInstallmentRepository;
+    private LoanInstallmentRepository loanInstallmentRepository;
     private CustomerRepository customerRepository;
     private LoanRepository loanRepository;
+
     public LoanInstallment findLoanInstellmentById(Long id) {
         return loanInstallmentRepository.findById(id).orElseThrow(() ->
                 new RuntimeException("LoanInstallment not found"));
@@ -36,6 +37,7 @@ public class LoanInstallmentService {
     public List<LoanInstallment> findLoanInstellmentsById(Long id) {
         return loanInstallmentRepository.findAllByLoanId(id);
     }
+
     @Transactional
     public PaymentResponse payLoanInstalments(PaymentRequest payment) {
         Customer customer = customerRepository.findByAccountNumber(payment.getAccountNumber())
@@ -52,16 +54,16 @@ public class LoanInstallmentService {
         double amount = payment.getAmount();
         double paidAmount = 0;
         List<LoanInstallment> paidInstallments = new ArrayList<>();
-        for(int i =0;i<unpaidInstallments.size();i++) {
+        for (int i = 0; i < unpaidInstallments.size(); i++) {
 
             LoanInstallment currentInstalment = unpaidInstallments.get(i);
             if (amount >= currentInstalment.getAmount() && payCounter <= 3) {
                 int daysDifference = daysBetween(currentInstalment.getDueDate(), payment.getPaymentDate());
                 Double LoanIstalmentAmount = currentInstalment.getAmount();
                 Double adjustedAmount = LoanIstalmentAmount;
-                if (daysDifference < 0) { // Paid early
+                if (daysDifference < 0) {
                     adjustedAmount -= 0.001 * Math.abs(daysDifference) * LoanIstalmentAmount;
-                } else if (daysDifference > 0) { // Paid late
+                } else if (daysDifference > 0) {
                     adjustedAmount += 0.001 * Math.abs(daysDifference) * LoanIstalmentAmount;
                 }
                 if (adjustedAmount > amount) {
@@ -72,8 +74,8 @@ public class LoanInstallmentService {
                 currentInstalment.setPaymentDate(payment.getPaymentDate());
                 paidInstallments.add(currentInstalment);
                 loanInstallmentRepository.save(currentInstalment);
-                log.info("Instalment Paid With Id {} for {} Id loan ",currentInstalment.getId()
-                        ,currentInstalment.getLoan().getId());
+                log.info("Instalment Paid With Id {} for {} Id loan ", currentInstalment.getId()
+                        , currentInstalment.getLoan().getId());
                 amount -= adjustedAmount;
                 payCounter++;
                 paidAmount += adjustedAmount;
@@ -82,19 +84,19 @@ public class LoanInstallmentService {
                 break;
             }
         }
-            requestedLoan.setNumberOfUnpaidInstallment(unpaidInstallments.size()-payCounter);
-            if(unpaidInstallments.size()-payCounter ==0){
-                requestedLoan.setPaid(true);
-            }
-            loanRepository.save(requestedLoan);
-            PaymentResponse paymentResponse = new PaymentResponse();
-            paymentResponse.setLoanId(requestedLoan.getId());
-            paymentResponse.setNumberOfPaidInstallments(payCounter);
-            paymentResponse.setPaidAmount(paidAmount);
-            paymentResponse.setPaidLoanInstallments(paidInstallments);
-            paymentResponse.setRefundAmount(amount);
-            return paymentResponse;
+        requestedLoan.setNumberOfUnpaidInstallment(unpaidInstallments.size() - payCounter);
+        if (unpaidInstallments.size() - payCounter == 0) {
+            requestedLoan.setPaid(true);
         }
+        loanRepository.save(requestedLoan);
+        PaymentResponse paymentResponse = new PaymentResponse();
+        paymentResponse.setLoanId(requestedLoan.getId());
+        paymentResponse.setNumberOfPaidInstallments(payCounter);
+        paymentResponse.setPaidAmount(paidAmount);
+        paymentResponse.setPaidLoanInstallments(paidInstallments);
+        paymentResponse.setRefundAmount(amount);
+        return paymentResponse;
+    }
 
     private int daysBetween(Date dueDate, Date currentDate) {
         Calendar dueCalendar = Calendar.getInstance();

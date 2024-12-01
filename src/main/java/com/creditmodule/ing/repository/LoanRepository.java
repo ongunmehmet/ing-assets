@@ -9,9 +9,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface LoanRepository  extends JpaRepository<Loan,Long> {
+public interface LoanRepository extends JpaRepository<Loan, Long> {
     @Query("SELECT u FROM Loan u WHERE u.customer.id= :id")
     List<Loan> findByCustomerId(@Param("id") Long customerId);
+
     @Query("SELECT u FROM Loan u WHERE u.customer.id= :customerId and u.id = :id")
-    Loan findByCustomerIdAndLoanId(@Param("id") Long id, @Param("customerId")Long customerId);
+    Loan findByCustomerIdAndLoanId(@Param("id") Long id, @Param("customerId") Long customerId);
 }

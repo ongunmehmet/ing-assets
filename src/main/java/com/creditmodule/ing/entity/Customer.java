@@ -27,7 +27,7 @@ public class Customer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id; // Shared primary key with User
+    private Long id;
 
     private String name;
 

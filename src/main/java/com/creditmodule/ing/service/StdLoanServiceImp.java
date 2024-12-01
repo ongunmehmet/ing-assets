@@ -10,7 +10,6 @@ import com.creditmodule.ing.repository.CustomerRepository;
 import com.creditmodule.ing.repository.LoanInstallmentRepository;
 import com.creditmodule.ing.repository.LoanRepository;
 import com.creditmodule.ing.utils.DateUtils;
-import com.creditmodule.ing.utils.UserUtils;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,9 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
-import static com.creditmodule.ing.utils.DateUtils.addOneMonth;
 import static com.creditmodule.ing.utils.DateUtils.getFirstDayOfNextMonth;
 
 @Service
@@ -31,7 +28,6 @@ public class StdLoanServiceImp implements LoanService {
     private CustomerRepository customerRepository;
     private LoanRepository loanRepository;
     private LoanInstallmentRepository loanInstallmentRepository;
-    private UserUtils userUtils;
     private final double INTEREST_RATE = 0.5;
 
     @Override
@@ -39,8 +35,8 @@ public class StdLoanServiceImp implements LoanService {
     public CreateLoanResponse createLoan(CreateLoanRequest request) {
 
         Customer customer = customerRepository.findByAccountNumber(request.getAccountNumber()).get();
-        if(request.getLoanAmount() >= customer.getCreditLimit()){
-            log.error("Loan not created for Customer {} Amount {}",customer.getName(), request.getLoanAmount());
+        if (request.getLoanAmount() >= customer.getCreditLimit()) {
+            log.error("Loan not created for Customer {} Amount {}", customer.getName(), request.getLoanAmount());
             throw new CreditLimitExceedException("Credit Limit Exceed");
         }
 
@@ -56,7 +52,7 @@ public class StdLoanServiceImp implements LoanService {
 
         loan = loanRepository.save(loan);
         List<LoanInstallment> installments = new ArrayList<>();
-        double totalPaymentAmount = (1+INTEREST_RATE) * request.getLoanAmount();
+        double totalPaymentAmount = (1 + INTEREST_RATE) * request.getLoanAmount();
         Date InstallmentDueDate = getFirstDayOfNextMonth(request.getCreateDate());
 
         for (int i = 0; i < request.getNumberOfInstallment(); i++) {
@@ -87,6 +83,6 @@ public class StdLoanServiceImp implements LoanService {
 
     @Override
     public Loan findCustomerLoanById(Long id, Long customerId) {
-        return loanRepository.findByCustomerIdAndLoanId(id,customerId);
+        return loanRepository.findByCustomerIdAndLoanId(id, customerId);
     }
 }

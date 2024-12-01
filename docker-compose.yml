@@ -11,7 +11,7 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_USER=user
     healthcheck:
-      test: ["CMD", "pg_isready"," -U $${POSTGRES_USER}","-d $${POSTGRES_DB}"]
+      test: ["CMD", "pg_isready"]
       interval: 5s
       retries: 5
     networks:

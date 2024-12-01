@@ -2,10 +2,8 @@ package com.creditmodule.ing.controller;
 
 import com.creditmodule.ing.data.CreateLoanRequest;
 import com.creditmodule.ing.data.CreateLoanResponse;
-import com.creditmodule.ing.data.CustomUserDetails;
 import com.creditmodule.ing.entity.Loan;
 import com.creditmodule.ing.service.LoanService;
-import com.creditmodule.ing.utils.UserUtils;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -16,7 +14,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,7 +24,6 @@ import java.util.List;
 @Tag(name = "Loan", description = "Endpoints for loan management")
 public class LoanController {
     private LoanService loanService;
-    private UserUtils userUtils;
 
     @Operation(summary = "Create Loan", description = "Create a new loan for a customer")
     @ApiResponses({
@@ -36,7 +32,7 @@ public class LoanController {
     })
     @PostMapping("/createLoan")
     @PreAuthorize("hasRole('ADMIN') or #request.accountNumber == authentication.principal.username")
-    public  ResponseEntity<CreateLoanResponse> createLoan(@RequestBody @Valid CreateLoanRequest request){
+    public ResponseEntity<CreateLoanResponse> createLoan(@RequestBody @Valid CreateLoanRequest request) {
         CreateLoanResponse response = loanService.createLoan(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

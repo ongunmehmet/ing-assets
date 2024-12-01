@@ -11,6 +11,7 @@ public class DateUtils {
         calendar.add(Calendar.MONTH, 1);
         return calendar.getTime();
     }
+
     public static Date addOneMonth(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);

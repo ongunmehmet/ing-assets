@@ -15,11 +15,18 @@ docker-compose -f docker-compose-localdb.yml up -d
 Then start IngApplication.java 
 
 Then copy curls form curlList.txt and copy your postman
-1-register
-2-login #use received token as barer token for all request
+1-register -first created user assigned as admin
+2-login -use received token as barer token for all request
 3-crete a loan and
 4-Make payment
-5-For admin role change one of records role to admin from users table
+
+
+```bash
+{
+  "accountNumber": "ccba07f2-07be-4205-bc5b-476cebf6799b",
+  "password": "123456"
+}
+```
 
 ## For API API Documentation
 After run application.
@@ -40,6 +47,11 @@ mvn clean package
 ```bash
 docker-compose up -d
 ```
+
+1-register -first created user assigned as admin
+2-login- use received token as barer token for all request
+3-crete a loan and
+4-Make payment
 ### Step 3: Stop the Services
 ```bash
 docker-compose down

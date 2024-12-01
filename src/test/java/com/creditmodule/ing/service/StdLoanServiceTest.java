@@ -5,12 +5,10 @@ import com.creditmodule.ing.data.CreateLoanResponse;
 import com.creditmodule.ing.entity.Customer;
 import com.creditmodule.ing.entity.Loan;
 import com.creditmodule.ing.entity.User;
-import com.creditmodule.ing.enums.Role;
 import com.creditmodule.ing.exceptions.CreditLimitExceedException;
 import com.creditmodule.ing.repository.CustomerRepository;
 import com.creditmodule.ing.repository.LoanInstallmentRepository;
 import com.creditmodule.ing.repository.LoanRepository;
-import com.creditmodule.ing.utils.UserUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,10 +17,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -42,8 +38,6 @@ public class StdLoanServiceTest {
     private LoanRepository loanRepository;
     @Mock
     private LoanInstallmentRepository loanInstallmentRepository;
-    @Mock
-    private UserUtils userUtils;
 
     @InjectMocks
     private StdLoanServiceImp stdLoanServiceImp;
@@ -63,13 +57,13 @@ public class StdLoanServiceTest {
     void testCreateLoan_Successful() {
 
         when(customerRepository.findByAccountNumber(request.getAccountNumber())).thenReturn(Optional.of(customer));
-        when(loanRepository.save(any(Loan.class))).thenReturn(new Loan()); // Mock Loan save
-        when(loanInstallmentRepository.saveAll(anyList())).thenReturn(new ArrayList<>()); // Mock Installment save
+        when(loanRepository.save(any(Loan.class))).thenReturn(new Loan());
+        when(loanInstallmentRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
 
-        // Act: Call the createLoan method
+        // Act:
         CreateLoanResponse response = stdLoanServiceImp.createLoan(request);
 
-        // Assert: Verify the response and interactions
+        // Assert:
         assertNotNull(response);
         assertEquals(request.getLoanAmount(), response.getLoanAmount());
         assertEquals(request.getNumberOfInstallment(), response.getNumberOfInstallment());
@@ -81,7 +75,7 @@ public class StdLoanServiceTest {
     @Test
     void testCreateLoan_CreditLimitExceeded() {
         // Arrange
-        request.setLoanAmount(12000L); // Exceed the credit limit
+        request.setLoanAmount(12000L);
         when(customerRepository.findByAccountNumber(request.getAccountNumber())).thenReturn(Optional.of(customer));
 
         // Act & Assert
@@ -101,6 +95,6 @@ public class StdLoanServiceTest {
         assertThrows(NoSuchElementException.class, () -> {
             stdLoanServiceImp.createLoan(request);
         });
-        verify(customerRepository, never()).save(any(Customer.class)); // Ensure customer is not saved
+        verify(customerRepository, never()).save(any(Customer.class));
     }
 }
