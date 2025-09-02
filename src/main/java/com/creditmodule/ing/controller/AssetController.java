@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +21,9 @@ import java.util.List;
 @RequestMapping("/api/asset")
 @Tag(name = "Asset", description = "Endpoints for assets")
 public class AssetController {
+    @Autowired
     private IAssetService assetService;
+    @Autowired
     private IOrderService orderService;
 
     @Operation(summary = "Create Asset", description = "Create a new asset ")
