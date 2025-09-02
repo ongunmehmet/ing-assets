@@ -13,12 +13,16 @@ import com.creditmodule.ing.enums.Status;
 import com.creditmodule.ing.repository.AssetRepository;
 import com.creditmodule.ing.repository.CustomerRepository;
 import com.creditmodule.ing.repository.OrderRepository;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
 
 @Service
+@Slf4j
+@AllArgsConstructor
 public class StdOrderServiceImp implements IOrderService {
     private CustomerRepository customerRepository;
     private AssetRepository assetRepository;
