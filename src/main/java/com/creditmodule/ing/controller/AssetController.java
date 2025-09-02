@@ -2,23 +2,26 @@ package com.creditmodule.ing.controller;
 
 import com.creditmodule.ing.data.CreateAssetRequest;
 import com.creditmodule.ing.data.CreateAssetResponse;
-import com.creditmodule.ing.data.CreateLoanResponse;
 import com.creditmodule.ing.entity.Asset;
-import com.creditmodule.ing.entity.Loan;
 import com.creditmodule.ing.service.IAssetService;
+import com.creditmodule.ing.service.IOrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@RestController
+@RequestMapping("/api/asset")
+@Tag(name = "Asset", description = "Endpoints for assets")
 public class AssetController {
     private IAssetService assetService;
+    private IOrderService orderService;
 
     @Operation(summary = "Create Asset", description = "Create a new asset ")
     @ApiResponses({
@@ -43,6 +46,11 @@ public class AssetController {
         assetService.deleteAsset(id);
         return ResponseEntity.ok("Asset deleted successfully");
     }
-
+    @GetMapping("/assets/{id}")
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
+    public ResponseEntity<List<Asset>> listAssets(@PathVariable Long id) {
+        List<Asset> assets = orderService.listAssets(id);
+        return ResponseEntity.ok(assets);
+    }
 
 }
