@@ -12,12 +12,12 @@ import com.creditmodule.ing.enums.Side;
 import com.creditmodule.ing.enums.Status;
 import com.creditmodule.ing.repository.AssetRepository;
 import com.creditmodule.ing.repository.CustomerRepository;
-import com.creditmodule.ing.repository.IOrderService;
 import com.creditmodule.ing.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+
 @Service
 public class StdOrderServiceImp implements IOrderService {
     private CustomerRepository customerRepository;
@@ -84,7 +84,7 @@ public class StdOrderServiceImp implements IOrderService {
                 )
         ).toList();
 
-        return new ListOrdersResponse(orderDtos);;
+        return new ListOrdersResponse(orderDtos);
     }
 
     @Override
@@ -105,7 +105,7 @@ public class StdOrderServiceImp implements IOrderService {
 
         orderRepository.delete(order);
 
-        return new DeleteOrderResponse(order.getId(), order.getAsset().getAssetName(), "Order cancelled successfully");;
+        return new DeleteOrderResponse(order.getId(), order.getAsset().getAssetName(), "Order cancelled successfully");
     }
 
     @Override
@@ -117,10 +117,10 @@ public class StdOrderServiceImp implements IOrderService {
                 .map(CustomerAsset::getAsset)
                 .toList();
     };
-    }
-
     @Override
     public void matchPendingOrders() {
 
     }
+
 }
+

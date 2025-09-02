@@ -2,18 +2,24 @@ package com.creditmodule.ing.service;
 
 import com.creditmodule.ing.data.CreateAssetRequest;
 import com.creditmodule.ing.data.CreateAssetResponse;
+import com.creditmodule.ing.data.CustomerAssetResponse;
 import com.creditmodule.ing.data.DeleteAssetResponse;
 import com.creditmodule.ing.entity.Asset;
+import com.creditmodule.ing.entity.Customer;
 import com.creditmodule.ing.repository.AssetRepository;
+import com.creditmodule.ing.repository.CustomerRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @Slf4j
 @AllArgsConstructor
 public class StdAssetServiceImp implements IAssetService {
     private AssetRepository assetRepository;
+    private CustomerRepository customerRepository;
 
     @Override
     public CreateAssetResponse createAsset(CreateAssetRequest request) {
@@ -29,6 +35,26 @@ public class StdAssetServiceImp implements IAssetService {
                 savedAsset.getUsableSize(),
                 "Asset created successfully"
         );
+    }
+
+    @Override
+    public List<Asset> listAllAssets() {
+        return assetRepository.findAll();
+    }
+
+    @Override
+    public List<CustomerAssetResponse> listCustomerAssets(Long customerId) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        return customer.getCustomerAssets().stream()
+                .map(ca -> new CustomerAssetResponse(
+                        ca.getAsset().getId(),
+                        ca.getAsset().getAssetName(),
+                        ca.getSize(),
+                        ca.getUsableSize()
+                ))
+                .toList();
     }
 
     @Override

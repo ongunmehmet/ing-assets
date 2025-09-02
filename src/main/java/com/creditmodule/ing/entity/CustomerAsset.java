@@ -13,12 +13,14 @@ public class CustomerAsset {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("customerId")
+    @JoinColumn(name = "customer_id")
     private Customer customer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("assetId")
+    @JoinColumn(name = "asset_id")
     private Asset asset;
 
-    private double size;        // how much this customer owns
-    private double usableSize;  // free to trade
+    private double size;
+    private double usableSize;
 }
