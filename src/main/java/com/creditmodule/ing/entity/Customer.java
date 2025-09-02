@@ -33,9 +33,10 @@ public class Customer {
 
     private String surname;
     @ColumnDefault("10000")
-    private Long creditLimit;
+    private Long credit;
 
-    private Long usedCreditLimit;
+    private Long usedCredit; // Already spent
+
 
     @OneToOne
     @JsonIgnore
@@ -45,7 +46,8 @@ public class Customer {
     private User user;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    @ToString.Exclude
-    private List<Loan> loans = new ArrayList<>();
+    private List<CustomerAsset> customerAssets = new ArrayList<>();
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders = new ArrayList<>();
 }

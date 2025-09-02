@@ -38,8 +38,8 @@ public class UserCustomerService {
         Customer customer = new Customer();
         customer.setName(request.getName());
         customer.setSurname(request.getSurname());
-        customer.setCreditLimit(request.getCreditLimit());
-        customer.setUsedCreditLimit(0L);
+        customer.setCredit(request.getCreditLimit());
+        customer.setUsedCredit(0L);
 
         customer.setId(user.getId());
         customer.setUser(user);
