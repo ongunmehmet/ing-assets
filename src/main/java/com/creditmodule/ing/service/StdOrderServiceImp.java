@@ -6,7 +6,6 @@ import com.creditmodule.ing.data.DeleteOrderResponse;
 import com.creditmodule.ing.data.ListOrdersResponse;
 import com.creditmodule.ing.entity.Asset;
 import com.creditmodule.ing.entity.Customer;
-import com.creditmodule.ing.entity.CustomerAsset;
 import com.creditmodule.ing.entity.Order;
 import com.creditmodule.ing.enums.Side;
 import com.creditmodule.ing.enums.Status;
@@ -29,6 +28,7 @@ public class StdOrderServiceImp implements IOrderService {
     private CustomerRepository customerRepository;
     private AssetRepository assetRepository;
     private OrderRepository orderRepository;
+
     @Override
     @Transactional
     public CreateOrderResponse createOrder(CreateOrderRequest request) {
@@ -38,7 +38,7 @@ public class StdOrderServiceImp implements IOrderService {
 
         Asset asset = assetRepository.findByAssetName(request.getAssetName())
                 .orElseThrow(() -> new RuntimeException("Asset not found"));
-        double price=asset.getInitialPrice();
+        double price = asset.getInitialPrice();
         double totalValue = request.getSize() * price;
 
         if (request.getSide() == Side.BUY && customer.getCredit() < totalValue) {
@@ -47,7 +47,7 @@ public class StdOrderServiceImp implements IOrderService {
 
 
         if (request.getSide() == Side.BUY) {
-            customer.setCredit(customer.getCredit() - (long) totalValue);
+            customer.setCredit(customer.getCredit() - totalValue);
             customerRepository.save(customer);
         }
 

@@ -11,7 +11,9 @@ import com.creditmodule.ing.enums.Role;
 import com.creditmodule.ing.enums.Side;
 import com.creditmodule.ing.enums.Status;
 
+import java.math.BigDecimal;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class TestUtils {
     public static User createMockUser() {
@@ -58,12 +60,25 @@ public class TestUtils {
         return customerAsset;
     }
 
-    public static Order createMockOrder(Customer customer, Asset asset) {
+    public static Order createMockBuyOrder(Customer customer, Asset asset) {
         Order order = new Order();
         order.setId(1L);
         order.setCustomer(customer);
         order.setAsset(asset);
         order.setOrderSide(Side.BUY);
+        order.setStatus(Status.PENDING);
+        order.setSize(10.0);
+        order.setCreateDate(new Date());
+        order.setTryCount(0);
+        return order;
+    }
+
+    public static Order createMockSellOrder(Customer customer, Asset asset) {
+        Order order = new Order();
+        order.setId(1L);
+        order.setCustomer(customer);
+        order.setAsset(asset);
+        order.setOrderSide(Side.SELL);
         order.setStatus(Status.PENDING);
         order.setSize(10.0);
         order.setCreateDate(new Date());
@@ -94,5 +109,66 @@ public static UserCustomerCreateRequest createMockUserCustomerCreateRequest() {
         request.setCreditLimit(10000L);
         return request;
     }
+    public static CreateAssetRequest createAssetRequest(String name, double size, double price) {
+        var req = new CreateAssetRequest();
+        req.setAssetName(name);
+        req.setInitialSize(size);
+        req.setInitialPrice(price);
+        return req;
+    }
+
+    public static Asset asset(String name, double size, double price) {
+        var asset = new Asset();
+        asset.setId(ThreadLocalRandom.current().nextLong(1, 100));
+        asset.setAssetName(name);
+        asset.setSize(size);
+        asset.setUsableSize(size); // full usable by default
+        asset.setInitialPrice(price);
+        return asset;
+    }
+
+    public static Customer customer(String name, String surname) {
+        var customer = new Customer();
+        customer.setId(ThreadLocalRandom.current().nextLong(1, 100));
+        customer.setName(name);
+        customer.setSurname(surname);
+        customer.setCredit(10000);
+        customer.setUsedCredit(0);
+        return customer;
+    }
+
+    public static CustomerAsset customerAsset(Customer customer, Asset asset, double size, double usableSize) {
+        var ca = new CustomerAsset();
+        var id = new CustomerAssetId();
+        id.setCustomerId(customer.getId());
+        id.setAssetId(asset.getId());
+
+        ca.setId(id);
+        ca.setCustomer(customer);
+        ca.setAsset(asset);
+        ca.setSize(size);
+        ca.setUsableSize(usableSize);
+        return ca;
 }
+    public static CreateOrderRequest createOrderRequest(Long customerId, String assetName, Side side, double size) {
+        var req = new CreateOrderRequest();
+        req.setCustomerId(customerId);
+        req.setAssetName(assetName);
+        req.setSide(side);
+        req.setSize(size);
+        return req;
+    }
+
+    public static Order order(Customer customer, Asset asset, Side side, double size, Date date) {
+        var order = new Order();
+        order.setCustomer(customer);
+        order.setAsset(asset);
+        order.setOrderSide(side);
+        order.setSize(size);
+        order.setCreateDate(date);
+        order.setStatus(Status.PENDING);
+        return order;
+    }
+}
+
 
