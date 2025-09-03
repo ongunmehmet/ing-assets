@@ -62,11 +62,17 @@ public class OrderMatchingService {
             order.setTryCount(tries);
 
             if (tries >= 5) {
+                // refund if it was a BUY order
+                if (order.getOrderSide() == Side.BUY) {
+                    Customer customer = customerRepository.findByIdForUpdate(order.getCustomer().getId());
+                    double refund = order.getSize() * order.getAsset().getInitialPrice();
+                    customer.setCredit(customer.getCredit() + refund);
+                }
                 order.setStatus(Status.CANCELLED);
                 log.warn("Order {} cancelled after 5 failures", orderId);
             } else {
                 orderRepository.save(order);
-                orderQueue.addOrder(orderId); // requeue
+                orderQueue.addOrder(orderId);
                 log.info("Order {} requeued, try {}", orderId, tries);
             }
         }
@@ -101,7 +107,12 @@ public class OrderMatchingService {
         order.setStatus(Status.MATCHED);
         order.setTryCount(order.getTryCount() + 1);
         if (order.getTryCount() >= 5) {
+
             order.setStatus(Status.CANCELLED);
+            if (order.getOrderSide() == Side.BUY) {
+                double refund = order.getSize() * asset.getInitialPrice();
+                customer.setCredit(customer.getCredit() + refund);
+            }
         }
         orderRepository.save(order);
     }
