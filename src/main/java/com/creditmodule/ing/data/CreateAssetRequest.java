@@ -11,4 +11,8 @@ public class CreateAssetRequest {
 
     @Positive(message = "Initial size must be greater than 0")
     private double initialSize;
+
+    @Positive(message = "Initial price must be greater than 0")
+    private double initialPrice;
+
 }

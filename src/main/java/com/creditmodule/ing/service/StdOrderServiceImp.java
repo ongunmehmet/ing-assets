@@ -13,12 +13,14 @@ import com.creditmodule.ing.enums.Status;
 import com.creditmodule.ing.repository.AssetRepository;
 import com.creditmodule.ing.repository.CustomerRepository;
 import com.creditmodule.ing.repository.OrderRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -28,6 +30,7 @@ public class StdOrderServiceImp implements IOrderService {
     private AssetRepository assetRepository;
     private OrderRepository orderRepository;
     @Override
+    @Transactional
     public CreateOrderResponse createOrder(CreateOrderRequest request) {
 
         Customer customer = customerRepository.findById(request.getCustomerId())
@@ -35,14 +38,14 @@ public class StdOrderServiceImp implements IOrderService {
 
         Asset asset = assetRepository.findByAssetName(request.getAssetName())
                 .orElseThrow(() -> new RuntimeException("Asset not found"));
-
-        double totalValue = request.getSize() * request.getPrice();
+        double price=asset.getInitialPrice();
+        double totalValue = request.getSize() * price;
 
         if (request.getSide() == Side.BUY && customer.getCredit() < totalValue) {
             throw new IllegalStateException("Insufficient credit for this order");
         }
 
-        // Deduct credit
+
         if (request.getSide() == Side.BUY) {
             customer.setCredit(customer.getCredit() - (long) totalValue);
             customerRepository.save(customer);
@@ -54,7 +57,6 @@ public class StdOrderServiceImp implements IOrderService {
         order.setAsset(asset);
         order.setOrderSide(request.getSide());
         order.setSize(request.getSize());
-        order.setPrice(request.getPrice());
         order.setStatus(Status.PENDING);
         order.setCreateDate(new Date());
 
@@ -66,7 +68,7 @@ public class StdOrderServiceImp implements IOrderService {
                 order.getOrderSide(),
                 order.getStatus(),
                 order.getSize(),
-                order.getPrice(),
+                totalValue,
                 order.getCreateDate(),
                 "Order created and pending"
         );
@@ -83,7 +85,6 @@ public class StdOrderServiceImp implements IOrderService {
                         order.getOrderSide(),
                         order.getStatus(),
                         order.getSize(),
-                        order.getPrice(),
                         order.getCreateDate()
                 )
         ).toList();
@@ -102,7 +103,7 @@ public class StdOrderServiceImp implements IOrderService {
 
         Customer customer = order.getCustomer();
         if (order.getOrderSide() == Side.BUY) {
-            double totalValue = order.getSize() * order.getPrice();
+            double totalValue = order.getSize() * order.getAsset().getInitialPrice();
             customer.setCredit(customer.getCredit() + (long) totalValue); // Refund credit
             customerRepository.save(customer);
         }
@@ -113,17 +114,8 @@ public class StdOrderServiceImp implements IOrderService {
     }
 
     @Override
-    public List<Asset> listAssets(Long customerId) {
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found"));
-
-        return customer.getCustomerAssets().stream()
-                .map(CustomerAsset::getAsset)
-                .toList();
-    };
-    @Override
-    public void matchPendingOrders() {
-
+    public Optional<Order> findOrder(Long id) {
+        return orderRepository.findById(id);
     }
 
 }

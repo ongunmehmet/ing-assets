@@ -4,7 +4,7 @@ import com.creditmodule.ing.data.CreateOrderRequest;
 import com.creditmodule.ing.data.CreateOrderResponse;
 import com.creditmodule.ing.data.DeleteOrderResponse;
 import com.creditmodule.ing.data.ListOrdersResponse;
-import com.creditmodule.ing.entity.Asset;
+import com.creditmodule.ing.entity.Order;
 import com.creditmodule.ing.service.IOrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -44,24 +44,18 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/delete/{orderId}/{id}")
+    @GetMapping("/show/{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
-    public ResponseEntity<DeleteOrderResponse> deleteOrder(@PathVariable Long orderId, @PathVariable Long id) {
-        DeleteOrderResponse response = orderService.deleteOrder(orderId);
+    public ResponseEntity<Optional<Order>> findOrder(
+            @PathVariable Long id) {
+        Optional<Order> response= orderService.findOrder(id);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/assets/{id}")
+    @DeleteMapping("/delete/{orderId}/{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
-    public ResponseEntity<List<Asset>> listAssets(@PathVariable Long id) {
-        List<Asset> assets = orderService.listAssets(id);
-        return ResponseEntity.ok(assets);
-    }
-
-    @PostMapping("/match")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> matchOrders() {
-        orderService.matchPendingOrders();
-        return ResponseEntity.ok("Pending orders matched successfully");
+    public ResponseEntity<DeleteOrderResponse> deleteOrder(@PathVariable Long orderId) {
+        DeleteOrderResponse response = orderService.deleteOrder(orderId);
+        return ResponseEntity.ok(response);
     }
 }

@@ -26,8 +26,8 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private Status status;
     private double size;
-    private double price;
     @Temporal(TemporalType.DATE)
     @JsonFormat(pattern = "dd-MM-yyyy")
     private Date createDate;
+    private int tryCount = 0;
 }

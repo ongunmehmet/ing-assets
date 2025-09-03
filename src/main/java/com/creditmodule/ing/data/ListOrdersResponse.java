@@ -24,7 +24,6 @@ public class ListOrdersResponse {
         private Side orderSide;
         private Status status;
         private double size;
-        private double price;
         private Date createDate;
     }
 }

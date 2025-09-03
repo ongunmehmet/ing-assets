@@ -2,7 +2,6 @@ package com.creditmodule.ing.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -33,9 +32,9 @@ public class Customer {
 
     private String surname;
     @ColumnDefault("10000")
-    private Long credit;
+    private double credit;
 
-    private Long usedCredit; // Already spent
+    private double usedCredit; // Already spent
 
 
     @OneToOne

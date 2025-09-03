@@ -54,7 +54,7 @@ public class CustomerController {
             @ApiResponse(responseCode = "200", description = "Customer found"),
             @ApiResponse(responseCode = "404", description = "Customer not found")
     })
-    @GetMapping("/v2/{accountNumber}")
+    @GetMapping("/getaccount/{accountNumber}")
     @PreAuthorize("hasRole('ADMIN') or #request.accountNumber == authentication.principal.username")
     public ResponseEntity<Customer> getCustomerWithAccountNumber(@PathVariable String accountNumber) {
         Customer customer = userCustomerService.findCustomerWithAccountNumber(accountNumber);

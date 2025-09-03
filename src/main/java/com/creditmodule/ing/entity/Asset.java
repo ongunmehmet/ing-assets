@@ -1,10 +1,10 @@
 package com.creditmodule.ing.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.ToString;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,11 +12,14 @@ import java.util.List;
 
 @Data
 @Entity
-@Table(name = "Assets")
+@Table(name = "assets", uniqueConstraints = {
+        @UniqueConstraint(columnNames = "assetName")
+})
 public class Asset {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false, unique = true)
     private String assetName;
     private double size;
     private double usableSize;

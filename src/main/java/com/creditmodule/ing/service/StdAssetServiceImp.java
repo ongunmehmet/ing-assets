@@ -10,9 +10,11 @@ import com.creditmodule.ing.repository.AssetRepository;
 import com.creditmodule.ing.repository.CustomerRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -23,18 +25,25 @@ public class StdAssetServiceImp implements IAssetService {
 
     @Override
     public CreateAssetResponse createAsset(CreateAssetRequest request) {
-        Asset asset = new Asset();
-        asset.setAssetName(request.getAssetName());
-        asset.setSize(request.getInitialSize());
-        asset.setUsableSize(request.getInitialSize());
-        Asset savedAsset = assetRepository.save(asset);
-        return new CreateAssetResponse(
-                savedAsset.getId(),
-                savedAsset.getAssetName(),
-                savedAsset.getSize(),
-                savedAsset.getUsableSize(),
-                "Asset created successfully"
-        );
+        try {
+            Asset asset = new Asset();
+            asset.setAssetName(request.getAssetName());
+            asset.setSize(request.getInitialSize());
+            asset.setUsableSize(request.getInitialSize());
+            asset.setInitialPrice(request.getInitialPrice());
+
+            Asset savedAsset = assetRepository.save(asset);
+
+            return new CreateAssetResponse(
+                    savedAsset.getId(),
+                    savedAsset.getAssetName(),
+                    savedAsset.getSize(),
+                    savedAsset.getUsableSize(),
+                    "Asset created successfully"
+            );
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("Asset with name " + request.getAssetName() + " already exists");
+        }
     }
 
     @Override
@@ -72,5 +81,10 @@ public class StdAssetServiceImp implements IAssetService {
                 asset.getId(),
                 asset.getAssetName(),
                 "Asset deleted successfully");
+    }
+
+    @Override
+    public Optional<Asset> findAssetById(Long id) {
+        return assetRepository.findById(id);
     }
 }

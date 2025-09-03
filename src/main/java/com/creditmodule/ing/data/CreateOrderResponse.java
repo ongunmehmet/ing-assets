@@ -17,7 +17,7 @@ public class CreateOrderResponse {
     private Side orderSide;
     private Status status;
     private double size;
-    private double price;
+    private double totalValue;
     private Date createDate;
     private String message;
 }

@@ -5,9 +5,11 @@ import com.creditmodule.ing.data.CreateOrderResponse;
 import com.creditmodule.ing.data.DeleteOrderResponse;
 import com.creditmodule.ing.data.ListOrdersResponse;
 import com.creditmodule.ing.entity.Asset;
+import com.creditmodule.ing.entity.Order;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 public interface IOrderService {
 
@@ -17,8 +19,7 @@ public interface IOrderService {
 
     DeleteOrderResponse deleteOrder(Long orderId);
 
-    List<Asset> listAssets(Long customerId);
+    Optional<Order> findOrder(Long id);
 
-    void matchPendingOrders(); // Admin endpoint
 }
 

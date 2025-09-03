@@ -1,94 +1,97 @@
 package com.creditmodule.ing.service;
 
-import com.creditmodule.ing.data.CreateLoanRequest;
-import com.creditmodule.ing.data.PaymentRequest;
-import com.creditmodule.ing.data.UserCustomerCreateRequest;
-import com.creditmodule.ing.entity.Customer;
-import com.creditmodule.ing.entity.Loan;
-import com.creditmodule.ing.entity.LoanInstallment;
-import com.creditmodule.ing.entity.User;
-import com.creditmodule.ing.enums.Role;
 
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+
+import com.creditmodule.ing.data.CreateAssetRequest;
+import com.creditmodule.ing.data.CreateOrderRequest;
+import com.creditmodule.ing.data.UserCustomerCreateRequest;
+import com.creditmodule.ing.entity.*;
+
+import com.creditmodule.ing.enums.Role;
+import com.creditmodule.ing.enums.Side;
+import com.creditmodule.ing.enums.Status;
+
+import java.util.*;
 
 public class TestUtils {
-    public static Customer createMockCustomer() {
-        Customer customer = new Customer();
-        customer.setId(1L);
-        customer.setName("John");
-        customer.setSurname("Doe");
-        customer.setCreditLimit(10000L);
-        customer.setUsedCreditLimit(2000L);
-        customer.setUser(createMockUser());
-        return customer;
-    }
-
-    public static Customer createMockCustomer(List<Loan> loan) {
-        Customer customer = new Customer();
-        customer.setId(1L);
-        customer.setName("John");
-        customer.setSurname("Doe");
-        customer.setCreditLimit(10000L);
-        customer.setUsedCreditLimit(2000L);
-        customer.setLoans(loan);
-        return customer;
-    }
-
     public static User createMockUser() {
         User user = new User();
-        user.setAccountNumber("123456");
+        user.setAccountNumber(UUID.randomUUID().toString());
         user.setUsername("testuser");
         user.setPassword("password");
         user.setRoles(Set.of(Role.ADMIN));
         return user;
     }
 
-    public static Loan createMockLoan() {
-        Loan loan = new Loan();
-        loan.setId(1L);
-        loan.setLoanAmount(5000L);
-        loan.setNumberOfInstallment(5);
-        loan.setNumberOfUnpaidInstallment(5);
-        loan.setCreateDate(new Date());
-
-        LoanInstallment installment = new LoanInstallment();
-        installment.setId(1L);
-        installment.setAmount(1000.0);
-        installment.setIsPaid(false);
-        installment.setDueDate(new Date());
-        installment.setLoan(loan);
-
-        loan.setLoanInstallments(Collections.singletonList(installment));
-        return loan;
+    public static Customer createMockCustomer() {
+        Customer customer = new Customer();
+        customer.setId(1L);
+        customer.setName("Alice");
+        customer.setSurname("Smith");
+        customer.setCredit(10_000L);
+        customer.setUser(createMockUser());
+        return customer;
     }
 
-    public static PaymentRequest createMockPaymentRequest() {
-        PaymentRequest paymentRequest = new PaymentRequest();
-        paymentRequest.setAccountNumber("123456");
-        paymentRequest.setLoanId(1L);
-        paymentRequest.setAmount(1000.0);
-        paymentRequest.setPaymentDate(new Date());
-        return paymentRequest;
+    public static Asset createMockAsset() {
+        Asset asset = new Asset();
+        asset.setId(1L);
+        asset.setAssetName("AAPL");
+        asset.setInitialPrice(100.0);
+        asset.setSize(1000.0);
+        asset.setUsableSize(1000.0);
+        return asset;
     }
 
-    public static UserCustomerCreateRequest createMockUserCustomerCreateRequest() {
+    public static CustomerAsset createMockCustomerAsset(Customer customer, Asset asset) {
+        CustomerAsset customerAsset = new CustomerAsset();
+        CustomerAssetId id = new CustomerAssetId();
+        id.setCustomerId(customer.getId());
+        id.setAssetId(asset.getId());
+
+        customerAsset.setId(id);
+        customerAsset.setCustomer(customer);
+        customerAsset.setAsset(asset);
+        customerAsset.setSize(50.0);
+        customerAsset.setUsableSize(50.0);
+
+        return customerAsset;
+    }
+
+    public static Order createMockOrder(Customer customer, Asset asset) {
+        Order order = new Order();
+        order.setId(1L);
+        order.setCustomer(customer);
+        order.setAsset(asset);
+        order.setOrderSide(Side.BUY);
+        order.setStatus(Status.PENDING);
+        order.setSize(10.0);
+        order.setCreateDate(new Date());
+        order.setTryCount(0);
+        return order;
+    }
+
+    public static CreateAssetRequest createMockAssetRequest() {
+        CreateAssetRequest request = new CreateAssetRequest();
+        request.setAssetName("GOOGL");
+        request.setInitialSize(500.0);
+        return request;
+    }
+
+    public static CreateOrderRequest createMockOrderRequest(Customer customer, Asset asset) {
+        CreateOrderRequest request = new CreateOrderRequest();
+        request.setCustomerId(customer.getId());
+        request.setAssetName(asset.getAssetName());
+        request.setSide(Side.BUY);
+        request.setSize(5.0);
+        return request;
+    }
+public static UserCustomerCreateRequest createMockUserCustomerCreateRequest() {
         UserCustomerCreateRequest request = new UserCustomerCreateRequest();
         request.setName("John");
         request.setSurname("Doe");
         request.setPassword("password123");
         request.setCreditLimit(10000L);
-        return request;
-    }
-
-    public static CreateLoanRequest createMockLoanRequest() {
-        CreateLoanRequest request = new CreateLoanRequest();
-        request.setAccountNumber("123456");
-        request.setLoanAmount(5000L);
-        request.setNumberOfInstallment(12);
-        request.setCreateDate(new Date());
         return request;
     }
 }
