@@ -2,6 +2,7 @@ package com.creditmodule.ing.entity;
 
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -26,5 +27,6 @@ public class Asset {
     private BigDecimal usableSize;
     private BigDecimal initialPrice;
     @OneToMany(mappedBy = "asset", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<CustomerAsset> customerAssets = new ArrayList<>();
 }
