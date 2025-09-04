@@ -16,6 +16,7 @@ import lombok.Data;
 import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,9 +33,9 @@ public class Customer {
 
     private String surname;
     @ColumnDefault("10000")
-    private double credit;
+    private BigDecimal credit = new BigDecimal("10000.00");;
 
-    private double usedCredit; // Already spent
+    private BigDecimal usedCredit; // Already spent
 
 
     @OneToOne

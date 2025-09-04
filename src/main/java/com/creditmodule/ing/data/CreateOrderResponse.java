@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -16,8 +17,8 @@ public class CreateOrderResponse {
     private String assetName;
     private Side orderSide;
     private Status status;
-    private double size;
-    private double totalValue;
+    private BigDecimal size;
+    private BigDecimal totalValue;
     private Date createDate;
     private String message;
 }

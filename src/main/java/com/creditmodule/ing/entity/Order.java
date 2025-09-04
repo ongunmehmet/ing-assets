@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Data
@@ -25,7 +26,7 @@ public class Order {
     private Side orderSide;
     @Enumerated(EnumType.STRING)
     private Status status;
-    private double size;
+    private BigDecimal size;
     @Temporal(TemporalType.DATE)
     @JsonFormat(pattern = "dd-MM-yyyy")
     private Date createDate;

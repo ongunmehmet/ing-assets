@@ -16,6 +16,7 @@ import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class TestUtils {
+
     public static User createMockUser() {
         User user = new User();
         user.setAccountNumber(UUID.randomUUID().toString());
@@ -30,7 +31,7 @@ public class TestUtils {
         customer.setId(1L);
         customer.setName("Alice");
         customer.setSurname("Smith");
-        customer.setCredit(10_000L);
+        customer.setCredit(BigDecimal.valueOf(10_000));
         customer.setUser(createMockUser());
         return customer;
     }
@@ -39,9 +40,9 @@ public class TestUtils {
         Asset asset = new Asset();
         asset.setId(1L);
         asset.setAssetName("AAPL");
-        asset.setInitialPrice(100.0);
-        asset.setSize(1000.0);
-        asset.setUsableSize(1000.0);
+        asset.setInitialPrice(BigDecimal.valueOf(100.0));
+        asset.setSize(BigDecimal.valueOf(1000.0));
+        asset.setUsableSize(BigDecimal.valueOf(1000.0));
         return asset;
     }
 
@@ -54,9 +55,8 @@ public class TestUtils {
         customerAsset.setId(id);
         customerAsset.setCustomer(customer);
         customerAsset.setAsset(asset);
-        customerAsset.setSize(50.0);
-        customerAsset.setUsableSize(50.0);
-
+        customerAsset.setSize(BigDecimal.valueOf(50.0));
+        customerAsset.setUsableSize(BigDecimal.valueOf(50.0));
         return customerAsset;
     }
 
@@ -67,7 +67,7 @@ public class TestUtils {
         order.setAsset(asset);
         order.setOrderSide(Side.BUY);
         order.setStatus(Status.PENDING);
-        order.setSize(10.0);
+        order.setSize(BigDecimal.valueOf(10.0));
         order.setCreateDate(new Date());
         order.setTryCount(0);
         return order;
@@ -80,7 +80,7 @@ public class TestUtils {
         order.setAsset(asset);
         order.setOrderSide(Side.SELL);
         order.setStatus(Status.PENDING);
-        order.setSize(10.0);
+        order.setSize(BigDecimal.valueOf(10.0));
         order.setCreateDate(new Date());
         order.setTryCount(0);
         return order;
@@ -89,7 +89,7 @@ public class TestUtils {
     public static CreateAssetRequest createMockAssetRequest() {
         CreateAssetRequest request = new CreateAssetRequest();
         request.setAssetName("GOOGL");
-        request.setInitialSize(500.0);
+        request.setInitialSize(BigDecimal.valueOf(500.0));
         return request;
     }
 
@@ -98,18 +98,20 @@ public class TestUtils {
         request.setCustomerId(customer.getId());
         request.setAssetName(asset.getAssetName());
         request.setSide(Side.BUY);
-        request.setSize(5.0);
+        request.setSize(BigDecimal.valueOf(5.0));
         return request;
     }
-public static UserCustomerCreateRequest createMockUserCustomerCreateRequest() {
+
+    public static UserCustomerCreateRequest createMockUserCustomerCreateRequest() {
         UserCustomerCreateRequest request = new UserCustomerCreateRequest();
-        request.setName("John");
-        request.setSurname("Doe");
+        request.setName("Test");
+        request.setSurname("User");
         request.setPassword("password123");
-        request.setCreditLimit(10000L);
+        request.setCreditLimit(BigDecimal.valueOf(10_000));
         return request;
     }
-    public static CreateAssetRequest createAssetRequest(String name, double size, double price) {
+
+    public static CreateAssetRequest createAssetRequest(String name, BigDecimal size, BigDecimal price) {
         var req = new CreateAssetRequest();
         req.setAssetName(name);
         req.setInitialSize(size);
@@ -117,7 +119,7 @@ public static UserCustomerCreateRequest createMockUserCustomerCreateRequest() {
         return req;
     }
 
-    public static Asset asset(String name, double size, double price) {
+    public static Asset asset(String name, BigDecimal size, BigDecimal price) {
         var asset = new Asset();
         asset.setId(ThreadLocalRandom.current().nextLong(1, 100));
         asset.setAssetName(name);
@@ -132,12 +134,12 @@ public static UserCustomerCreateRequest createMockUserCustomerCreateRequest() {
         customer.setId(ThreadLocalRandom.current().nextLong(1, 100));
         customer.setName(name);
         customer.setSurname(surname);
-        customer.setCredit(10000);
-        customer.setUsedCredit(0);
+        customer.setCredit(BigDecimal.valueOf(10_000));
+        customer.setUsedCredit(BigDecimal.ZERO);
         return customer;
     }
 
-    public static CustomerAsset customerAsset(Customer customer, Asset asset, double size, double usableSize) {
+    public static CustomerAsset customerAsset(Customer customer, Asset asset, BigDecimal size, BigDecimal usableSize) {
         var ca = new CustomerAsset();
         var id = new CustomerAssetId();
         id.setCustomerId(customer.getId());
@@ -149,8 +151,9 @@ public static UserCustomerCreateRequest createMockUserCustomerCreateRequest() {
         ca.setSize(size);
         ca.setUsableSize(usableSize);
         return ca;
-}
-    public static CreateOrderRequest createOrderRequest(Long customerId, String assetName, Side side, double size) {
+    }
+
+    public static CreateOrderRequest createOrderRequest(Long customerId, String assetName, Side side, BigDecimal size) {
         var req = new CreateOrderRequest();
         req.setCustomerId(customerId);
         req.setAssetName(assetName);
@@ -159,7 +162,7 @@ public static UserCustomerCreateRequest createMockUserCustomerCreateRequest() {
         return req;
     }
 
-    public static Order order(Customer customer, Asset asset, Side side, double size, Date date) {
+    public static Order order(Customer customer, Asset asset, Side side, BigDecimal size, Date date) {
         var order = new Order();
         order.setCustomer(customer);
         order.setAsset(asset);
@@ -170,5 +173,6 @@ public static UserCustomerCreateRequest createMockUserCustomerCreateRequest() {
         return order;
     }
 }
+
 
 

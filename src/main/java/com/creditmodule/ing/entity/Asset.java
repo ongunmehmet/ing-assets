@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,9 +22,9 @@ public class Asset {
     private Long id;
     @Column(nullable = false, unique = true)
     private String assetName;
-    private double size;
-    private double usableSize;
-    private double initialPrice;
+    private BigDecimal size;
+    private BigDecimal usableSize;
+    private BigDecimal initialPrice;
     @OneToMany(mappedBy = "asset", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CustomerAsset> customerAssets = new ArrayList<>();
 }

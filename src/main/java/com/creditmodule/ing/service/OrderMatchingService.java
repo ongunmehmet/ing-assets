@@ -13,6 +13,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 @AllArgsConstructor
 @Slf4j
@@ -28,26 +30,25 @@ public class OrderMatchingService {
             Order order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new RuntimeException("Order not found"));
 
-
             Asset asset = assetRepository.findByIdForUpdate(order.getAsset().getId());
             Customer customer = customerRepository.findByIdForUpdate(order.getCustomer().getId());
 
-            double price = asset.getInitialPrice();
+            BigDecimal price = asset.getInitialPrice();
             if (order.getStatus() != Status.PENDING) {
                 return;
             }
 
             if (order.getOrderSide() == Side.BUY) {
-                double totalPrice = order.getSize() * price;
-                if (customer.getCredit() < totalPrice) {
+                BigDecimal totalPrice = order.getSize().multiply(price);
+                if (customer.getCredit().compareTo(totalPrice) < 0) {
                     throw new RuntimeException("Insufficient credit");
                 }
-                customer.setCredit(customer.getCredit() - totalPrice);
-                asset.setUsableSize(asset.getUsableSize() - order.getSize());
+                customer.setCredit(customer.getCredit().subtract(totalPrice));
+                asset.setUsableSize(asset.getUsableSize().subtract(order.getSize()));
             } else {
-
-                asset.setUsableSize(asset.getUsableSize() + order.getSize());
-                customer.setCredit(customer.getCredit() + (order.getSize() * price));
+                asset.setUsableSize(asset.getUsableSize().add(order.getSize()));
+                BigDecimal totalValue = order.getSize().multiply(price);
+                customer.setCredit(customer.getCredit().add(totalValue));
             }
 
             order.setStatus(Status.MATCHED);
@@ -65,8 +66,8 @@ public class OrderMatchingService {
                 // refund if it was a BUY order
                 if (order.getOrderSide() == Side.BUY) {
                     Customer customer = customerRepository.findByIdForUpdate(order.getCustomer().getId());
-                    double refund = order.getSize() * order.getAsset().getInitialPrice();
-                    customer.setCredit(customer.getCredit() + refund);
+                    BigDecimal refund = order.getSize().multiply(order.getAsset().getInitialPrice());
+                    customer.setCredit(customer.getCredit().add(refund));
                 }
                 order.setStatus(Status.CANCELLED);
                 log.warn("Order {} cancelled after 5 failures", orderId);
@@ -77,6 +78,7 @@ public class OrderMatchingService {
             }
         }
     }
+
     @Transactional
     public void processSingleOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
@@ -86,35 +88,36 @@ public class OrderMatchingService {
             throw new IllegalStateException("Only PENDING orders can be matched");
         }
 
-
         Asset asset = assetRepository.findByIdForUpdate(order.getAsset().getId());
         Customer customer = customerRepository.findByIdForUpdate(order.getCustomer().getId());
 
-        double price = asset.getInitialPrice();
+        BigDecimal price = asset.getInitialPrice();
+
         if (order.getOrderSide() == Side.BUY) {
-            double totalPrice = order.getSize() * price;
-            if (customer.getCredit() < totalPrice) {
+            BigDecimal totalPrice = order.getSize().multiply(price);
+            if (customer.getCredit().compareTo(totalPrice) < 0) {
                 throw new IllegalStateException("Insufficient credit");
             }
-            customer.setCredit(customer.getCredit() - totalPrice);
-            asset.setUsableSize(asset.getUsableSize() - order.getSize());
+            customer.setCredit(customer.getCredit().subtract(totalPrice));
+            asset.setUsableSize(asset.getUsableSize().subtract(order.getSize()));
         } else {
-
-            asset.setUsableSize(asset.getUsableSize() + order.getSize());
-            customer.setCredit(customer.getCredit() + (order.getSize() * price));
+            asset.setUsableSize(asset.getUsableSize().add(order.getSize()));
+            BigDecimal totalValue = order.getSize().multiply(price);
+            customer.setCredit(customer.getCredit().add(totalValue));
         }
 
-        order.setStatus(Status.MATCHED);
         order.setTryCount(order.getTryCount() + 1);
-        if (order.getTryCount() >= 5) {
 
+        if (order.getTryCount() >= 5) {
             order.setStatus(Status.CANCELLED);
             if (order.getOrderSide() == Side.BUY) {
-                double refund = order.getSize() * asset.getInitialPrice();
-                customer.setCredit(customer.getCredit() + refund);
+                BigDecimal refund = order.getSize().multiply(asset.getInitialPrice());
+                customer.setCredit(customer.getCredit().add(refund));
             }
+        } else {
+            order.setStatus(Status.MATCHED);
         }
+
         orderRepository.save(order);
     }
 }
-

@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.Set;
 import java.util.UUID;
 
@@ -39,7 +40,7 @@ public class UserCustomerService {
         customer.setName(request.getName());
         customer.setSurname(request.getSurname());
         customer.setCredit(request.getCreditLimit());
-        customer.setUsedCredit(0L);
+        customer.setUsedCredit(BigDecimal.valueOf(0L));
 
         customer.setId(user.getId());
         customer.setUser(user);

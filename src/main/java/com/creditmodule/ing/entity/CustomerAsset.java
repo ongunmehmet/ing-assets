@@ -3,6 +3,8 @@ package com.creditmodule.ing.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 @Entity
 @Table(name = "customer_assets")
@@ -21,6 +23,6 @@ public class CustomerAsset {
     @JoinColumn(name = "asset_id")
     private Asset asset;
 
-    private double size;
-    private double usableSize;
+    private BigDecimal size;
+    private BigDecimal usableSize;
 }

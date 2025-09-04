@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -25,9 +26,10 @@ import java.util.Optional;
 @Slf4j
 @AllArgsConstructor
 public class StdOrderServiceImp implements IOrderService {
-    private CustomerRepository customerRepository;
-    private AssetRepository assetRepository;
-    private OrderRepository orderRepository;
+
+    private final CustomerRepository customerRepository;
+    private final AssetRepository assetRepository;
+    private final OrderRepository orderRepository;
 
     @Override
     @Transactional
@@ -38,16 +40,16 @@ public class StdOrderServiceImp implements IOrderService {
 
         Asset asset = assetRepository.findByAssetName(request.getAssetName())
                 .orElseThrow(() -> new RuntimeException("Asset not found"));
-        double price = asset.getInitialPrice();
-        double totalValue = request.getSize() * price;
 
-        if (request.getSide() == Side.BUY && customer.getCredit() < totalValue) {
+        BigDecimal price = asset.getInitialPrice();
+        BigDecimal totalValue = request.getSize().multiply(price);
+
+        if (request.getSide() == Side.BUY && customer.getCredit().compareTo(totalValue) < 0) {
             throw new IllegalStateException("Insufficient credit for this order");
         }
 
-
         if (request.getSide() == Side.BUY) {
-            customer.setCredit(customer.getCredit() - totalValue);
+            customer.setCredit(customer.getCredit().subtract(totalValue));
             customerRepository.save(customer);
         }
 
@@ -78,21 +80,21 @@ public class StdOrderServiceImp implements IOrderService {
     public ListOrdersResponse listOrders(Long customerId, Date startDate, Date endDate) {
         List<Order> orders = orderRepository.findByCustomerIdAndCreateDateBetween(customerId, startDate, endDate);
 
-        List<ListOrdersResponse.OrderDto> orderDtos = orders.stream().map(order ->
-                new ListOrdersResponse.OrderDto(
+        List<ListOrdersResponse.OrderDto> orderDtos = orders.stream()
+                .map(order -> new ListOrdersResponse.OrderDto(
                         order.getId(),
                         order.getAsset().getAssetName(),
                         order.getOrderSide(),
                         order.getStatus(),
                         order.getSize(),
                         order.getCreateDate()
-                )
-        ).toList();
+                )).toList();
 
         return new ListOrdersResponse(orderDtos);
     }
 
     @Override
+    @Transactional
     public DeleteOrderResponse deleteOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
@@ -103,20 +105,24 @@ public class StdOrderServiceImp implements IOrderService {
 
         Customer customer = order.getCustomer();
         if (order.getOrderSide() == Side.BUY) {
-            double totalValue = order.getSize() * order.getAsset().getInitialPrice();
-            customer.setCredit(customer.getCredit() + (long) totalValue); // Refund credit
+            BigDecimal totalValue = order.getSize().multiply(order.getAsset().getInitialPrice());
+            customer.setCredit(customer.getCredit().add(totalValue)); // Refund
             customerRepository.save(customer);
         }
 
         orderRepository.delete(order);
 
-        return new DeleteOrderResponse(order.getId(), order.getAsset().getAssetName(), "Order cancelled successfully");
+        return new DeleteOrderResponse(
+                order.getId(),
+                order.getAsset().getAssetName(),
+                "Order cancelled successfully"
+        );
     }
 
     @Override
     public Optional<Order> findOrder(Long id) {
         return orderRepository.findById(id);
     }
-
 }
+
 
