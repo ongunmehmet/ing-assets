@@ -10,6 +10,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=password
       - POSTGRES_USER=user
+      - POSTGRES_DB=testing
     healthcheck:
       test: ["CMD", "pg_isready"]
       interval: 5s
@@ -17,11 +18,12 @@ services:
     networks:
       - app-network
 
-  ing-loan-case:
+  ing-asset-case:
     build:
       context: .
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/testing
       - SPRING_DATASOURCE_USERNAME=user
