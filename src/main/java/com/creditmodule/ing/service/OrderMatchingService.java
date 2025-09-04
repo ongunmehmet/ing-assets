@@ -26,98 +26,95 @@ public class OrderMatchingService {
 
     @Transactional
     public void processOrder(Long orderId) {
-        try {
-            Order order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new RuntimeException("Order not found"));
 
-            Asset asset = assetRepository.findByIdForUpdate(order.getAsset().getId());
-            Customer customer = customerRepository.findByIdForUpdate(order.getCustomer().getId());
-
-            BigDecimal price = asset.getInitialPrice();
-            if (order.getStatus() != Status.PENDING) {
-                return;
-            }
-
-            if (order.getOrderSide() == Side.BUY) {
-                BigDecimal totalPrice = order.getSize().multiply(price);
-                if (customer.getCredit().compareTo(totalPrice) < 0) {
-                    throw new RuntimeException("Insufficient credit");
-                }
-                customer.setCredit(customer.getCredit().subtract(totalPrice));
-                asset.setUsableSize(asset.getUsableSize().subtract(order.getSize()));
-            } else {
-                asset.setUsableSize(asset.getUsableSize().add(order.getSize()));
-                BigDecimal totalValue = order.getSize().multiply(price);
-                customer.setCredit(customer.getCredit().add(totalValue));
-            }
-
-            order.setStatus(Status.MATCHED);
-            orderRepository.save(order);
-            log.info("Order {} matched successfully", orderId);
-
-        } catch (Exception e) {
-            log.error("Order {} failed: {}", orderId, e.getMessage());
-
-            Order order = orderRepository.findById(orderId).orElseThrow();
-            int tries = order.getTryCount() + 1;
-            order.setTryCount(tries);
-
-            if (tries >= 5) {
-                // refund if it was a BUY order
-                if (order.getOrderSide() == Side.BUY) {
-                    Customer customer = customerRepository.findByIdForUpdate(order.getCustomer().getId());
-                    BigDecimal refund = order.getSize().multiply(order.getAsset().getInitialPrice());
-                    customer.setCredit(customer.getCredit().add(refund));
-                }
-                order.setStatus(Status.CANCELLED);
-                log.warn("Order {} cancelled after 5 failures", orderId);
-            } else {
-                orderRepository.save(order);
-                orderQueue.addOrder(orderId);
-                log.info("Order {} requeued, try {}", orderId, tries);
-            }
-        }
+        process(orderId, true);
     }
 
     @Transactional
     public void processSingleOrder(Long orderId) {
-        Order order = orderRepository.findById(orderId)
+        Order snapshot = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        if (order.getStatus() != Status.PENDING) {
+        if (snapshot.getStatus() != Status.PENDING) {
             throw new IllegalStateException("Only PENDING orders can be matched");
         }
 
+        process(orderId, false);
+    }
+
+    private void process(Long orderId, boolean requeueOnFail) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (order.getStatus() != Status.PENDING) return;
+
         Asset asset = assetRepository.findByIdForUpdate(order.getAsset().getId());
         Customer customer = customerRepository.findByIdForUpdate(order.getCustomer().getId());
-
         BigDecimal price = asset.getInitialPrice();
 
+        boolean canMatch = canMatch(order, asset, customer, price);
+
+        if (!canMatch) {
+            handleFailedAttempt(order, asset, customer, price, requeueOnFail); // increments tryCount on failure
+            return;
+        }
+
+        applyMatch(order, asset, customer, price);
+        order.setStatus(Status.MATCHED);
+        orderRepository.save(order);
+        log.info("Order {} matched successfully", orderId);
+    }
+
+
+    private boolean canMatch(Order order, Asset asset, Customer customer, BigDecimal price) {
         if (order.getOrderSide() == Side.BUY) {
-            BigDecimal totalPrice = order.getSize().multiply(price);
-            if (customer.getCredit().compareTo(totalPrice) < 0) {
-                throw new IllegalStateException("Insufficient credit");
-            }
-            customer.setCredit(customer.getCredit().subtract(totalPrice));
+
+            return asset.getUsableSize().compareTo(order.getSize()) >= 0;
+        } else {
+
+            return true;
+        }
+    }
+
+    private void applyMatch(Order order, Asset asset, Customer customer, BigDecimal price) {
+        if (order.getOrderSide() == Side.BUY) {
+
             asset.setUsableSize(asset.getUsableSize().subtract(order.getSize()));
         } else {
+
             asset.setUsableSize(asset.getUsableSize().add(order.getSize()));
             BigDecimal totalValue = order.getSize().multiply(price);
             customer.setCredit(customer.getCredit().add(totalValue));
         }
+    }
 
-        order.setTryCount(order.getTryCount() + 1);
 
-        if (order.getTryCount() >= 5) {
+    private void handleFailedAttempt(
+            Order order, Asset asset, Customer customer, BigDecimal price, boolean requeueOnFail) {
+
+        int nextTry = order.getTryCount() + 1;
+        order.setTryCount(nextTry);
+
+        if (nextTry >= 5) {
             order.setStatus(Status.CANCELLED);
+
             if (order.getOrderSide() == Side.BUY) {
-                BigDecimal refund = order.getSize().multiply(asset.getInitialPrice());
+                BigDecimal refund = order.getSize().multiply(price);
                 customer.setCredit(customer.getCredit().add(refund));
             }
-        } else {
-            order.setStatus(Status.MATCHED);
+
+            orderRepository.save(order);
+            log.warn("Order {} cancelled after {} failures", order.getId(), nextTry);
+            return;
         }
 
+
         orderRepository.save(order);
+        if (requeueOnFail) {
+            orderQueue.addOrder(order.getId());
+            log.info("Order {} requeued, try {}", order.getId(), nextTry);
+        } else {
+            log.info("Order {} remains PENDING after manual attempt {}, not requeued", order.getId(), nextTry);
+        }
     }
 }
