@@ -23,40 +23,34 @@ import java.util.Optional;
 @RequestMapping("/api/asset")
 @Tag(name = "Asset", description = "Endpoints for assets")
 public class AssetController {
+
     @Autowired
     private IAssetService assetService;
     @Autowired
     private IOrderService orderService;
 
-    @Operation(summary = "Create Asset", description = "Create a new asset ")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Asset created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid asset request")
-    })
+
     @PostMapping("/createAsset")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CreateAssetResponse> createAsset(@RequestBody  CreateAssetRequest request) {
+    public ResponseEntity<CreateAssetResponse> createAsset(@RequestBody CreateAssetRequest request) {
         CreateAssetResponse response = assetService.createAsset(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(summary = "Delete asset by ID", description = "Retrieve a specific asset by ID")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Asset details retrieved"),
-            @ApiResponse(responseCode = "404", description = "Asset not found")
-    })
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteAsset(@PathVariable Long id) {
         assetService.deleteAsset(id);
         return ResponseEntity.ok("Asset deleted successfully");
     }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Optional<Asset>> showAsset(@PathVariable Long id) {
-        Optional<Asset> asset= assetService.findAssetById(id);
+        Optional<Asset> asset = assetService.findAssetById(id);
         return ResponseEntity.ok(asset);
     }
+
     @GetMapping("/assets/all")
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     public ResponseEntity<List<Asset>> listAssets() {

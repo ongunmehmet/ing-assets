@@ -48,7 +48,7 @@ public class OrderController {
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     public ResponseEntity<Optional<Order>> findOrder(
             @PathVariable Long id) {
-        Optional<Order> response= orderService.findOrder(id);
+        Optional<Order> response = orderService.findOrder(id);
         return ResponseEntity.ok(response);
     }
 
