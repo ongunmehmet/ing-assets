@@ -2,7 +2,6 @@ package com.creditmodule.ing.entity;
 
 import com.creditmodule.ing.enums.Side;
 import com.creditmodule.ing.enums.Status;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -19,11 +18,9 @@ public class Order {
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
-    @JsonBackReference
     private Customer customer;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "asset_id", nullable = false)
-    @JsonBackReference
     private Asset asset;
     @Enumerated(EnumType.STRING)
     private Side orderSide;

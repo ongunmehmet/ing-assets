@@ -1,6 +1,6 @@
 package com.creditmodule.ing.service;
 
-
+import com.creditmodule.ing.data.CustomerDetailDto;
 import com.creditmodule.ing.data.UserCustomerCreateRequest;
 import com.creditmodule.ing.entity.Customer;
 import com.creditmodule.ing.entity.User;
@@ -15,17 +15,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
-
 import java.util.UUID;
 
-import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UserCustomerServiceTest {
@@ -41,7 +39,6 @@ public class UserCustomerServiceTest {
     private UserCustomerService userCustomerService;
 
     private UserCustomerCreateRequest validRequest;
-    private UserCustomerCreateRequest invalidRequest;
     private Customer mockCustomer;
     private String mockAccountNumber;
 
@@ -54,68 +51,68 @@ public class UserCustomerServiceTest {
 
     @Test
     void testCreateUserAndCustomer_Success() {
-        // Arrange:
+
         when(passwordEncoder.encode(validRequest.getPassword())).thenReturn("encodedPassword");
 
-        // Arrange:
-        User mockUser = new User();
-        mockUser.setId(1L);
-        mockUser.setAccountNumber(UUID.randomUUID().toString());
+        when(customerRepository.findAll()).thenReturn(Collections.emptyList());
 
-        Customer mockCustomer = new Customer();
-        mockCustomer.setId(mockUser.getId());
-        mockCustomer.setUser(mockUser);
+        User savedUser = new User();
+        savedUser.setId(1L);
+        savedUser.setAccountNumber(UUID.randomUUID().toString());
 
-        when(userRepository.save(any(User.class))).thenReturn(mockUser);
-        when(customerRepository.save(any(Customer.class))).thenReturn(mockCustomer);
+        Customer savedCustomer = new Customer();
+        savedCustomer.setId(savedUser.getId());
+        savedCustomer.setUser(savedUser);
 
-        // Act:
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(customerRepository.save(any(Customer.class))).thenReturn(savedCustomer);
+
         String accountNumber = userCustomerService.createUserAndCustomer(validRequest);
 
-        // Assert:
         assertNotNull(accountNumber);
-        assertTrue(accountNumber.length() > 0);
+        assertFalse(accountNumber.isBlank());
+        verify(customerRepository).findAll();
         verify(userRepository).save(any(User.class));
         verify(customerRepository).save(any(Customer.class));
     }
 
     @Test
     void testFindCustomerById_Success() {
-        // Arrange:
+        // Arrange
         when(customerRepository.findById(1L)).thenReturn(Optional.of(mockCustomer));
 
-        // Act:
-        Customer customer = userCustomerService.findCustomerById(1L);
+        // Act
+        CustomerDetailDto dto = userCustomerService.findCustomerById(1L);
 
-        // Assert:
-        assertNotNull(customer);
-        assertEquals(mockCustomer.getId(), customer.getId());
+        // Assert
+        assertNotNull(dto);
+        assertEquals(mockCustomer.getId(), dto.id());
+        assertEquals(mockCustomer.getName(), dto.name());
+        assertEquals(mockCustomer.getSurname(), dto.surname());
+        assertEquals(mockCustomer.getCredit(), dto.credit());
+        // assets/orders may be empty depending on your TestUtils setup:
+        assertNotNull(dto.assets());
+        assertNotNull(dto.orders());
         verify(customerRepository).findById(1L);
     }
 
     @Test
     void testFindCustomerById_CustomerNotFound() {
-        // Arrange:
         when(customerRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // Act & Assert:
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
-            userCustomerService.findCustomerById(1L);
-        });
+        ResourceNotFoundException ex =
+                assertThrows(ResourceNotFoundException.class, () -> userCustomerService.findCustomerById(1L));
 
-        assertEquals("Customer not found", exception.getMessage());
+        assertEquals("Customer not found", ex.getMessage());
         verify(customerRepository).findById(1L);
     }
 
     @Test
     void testFindCustomerIdByAccountNumber_Success() {
-        // Arrange:
         when(customerRepository.findByAccountNumber(mockAccountNumber)).thenReturn(Optional.of(mockCustomer));
 
-        // Act:
         Long customerId = userCustomerService.findCustomerIdByAccountNumber(mockAccountNumber);
 
-        // Assert:
         assertNotNull(customerId);
         assertEquals(mockCustomer.getId(), customerId);
         verify(customerRepository).findByAccountNumber(mockAccountNumber);
@@ -123,15 +120,75 @@ public class UserCustomerServiceTest {
 
     @Test
     void testFindCustomerIdByAccountNumber_CustomerNotFound() {
-        // Arrange:
         when(customerRepository.findByAccountNumber(mockAccountNumber)).thenReturn(Optional.empty());
 
-        // Act & Assert:
-        ResourceNotFoundException exception = assertThrows(ResourceNotFoundException.class, () -> {
-            userCustomerService.findCustomerIdByAccountNumber(mockAccountNumber);
-        });
+        ResourceNotFoundException ex =
+                assertThrows(ResourceNotFoundException.class,
+                        () -> userCustomerService.findCustomerIdByAccountNumber(mockAccountNumber));
 
-        assertEquals("Customer not found", exception.getMessage());
+        assertEquals("Customer not found", ex.getMessage());
         verify(customerRepository).findByAccountNumber(mockAccountNumber);
+    }
+
+    @Test
+    void testFindCustomerWithAccountNumber_Success() {
+        when(customerRepository.findByAccountNumber(mockAccountNumber)).thenReturn(Optional.of(mockCustomer));
+
+        CustomerDetailDto dto = userCustomerService.findCustomerWithAccountNumber(mockAccountNumber);
+
+        assertNotNull(dto);
+        assertEquals(mockCustomer.getId(), dto.id());
+        assertEquals(mockCustomer.getName(), dto.name());
+        assertEquals(mockCustomer.getSurname(), dto.surname());
+        assertEquals(mockCustomer.getCredit(), dto.credit());
+        verify(customerRepository).findByAccountNumber(mockAccountNumber);
+    }
+
+    @Test
+    void testFindCustomerWithAccountNumber_NotFound() {
+        when(customerRepository.findByAccountNumber(mockAccountNumber)).thenReturn(Optional.empty());
+
+        ResourceNotFoundException ex =
+                assertThrows(ResourceNotFoundException.class,
+                        () -> userCustomerService.findCustomerWithAccountNumber(mockAccountNumber));
+
+        assertEquals("Customer not found", ex.getMessage());
+        verify(customerRepository).findByAccountNumber(mockAccountNumber);
+    }
+
+    @Test
+    void testListAllCustomers_ReturnsMappedDtos() {
+        // Arrange: build two lightweight customers (with initialized collections)
+        Customer c1 = TestUtils.customer("Alice", "One");
+        c1.setCustomerAssets(new ArrayList<>());
+        c1.setOrders(new ArrayList<>());
+
+        Customer c2 = TestUtils.customer("Bob", "Two");
+        c2.setCustomerAssets(new ArrayList<>());
+        c2.setOrders(new ArrayList<>());
+
+        when(customerRepository.findAll()).thenReturn(List.of(c1, c2));
+
+        List<CustomerDetailDto> result = userCustomerService.listAll();
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        CustomerDetailDto d1 = result.getFirst();
+        assertEquals(c1.getId(), d1.id());
+        assertEquals("Alice", d1.name());
+        assertEquals("One", d1.surname());
+        assertNotNull(d1.assets());
+        assertNotNull(d1.orders());
+
+        // Verify second
+        CustomerDetailDto d2 = result.get(1);
+        assertEquals(c2.getId(), d2.id());
+        assertEquals("Bob", d2.name());
+        assertEquals("Two", d2.surname());
+        assertNotNull(d2.assets());
+        assertNotNull(d2.orders());
+
+        verify(customerRepository).findAll();
     }
 }

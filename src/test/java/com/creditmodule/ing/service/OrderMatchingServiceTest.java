@@ -24,7 +24,6 @@ import java.util.Date;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -67,11 +66,9 @@ class OrderMatchingServiceTest {
         when(assetRepository.findByIdForUpdate(asset.getId())).thenReturn(asset);
         when(customerRepository.findByIdForUpdate(customer.getId())).thenReturn(customer);
 
-        // no existing holding -> create one
         when(customerAssetRepository.findByCustomerAndAsset(customer, asset))
                 .thenReturn(Optional.empty());
 
-        // capture saved CustomerAsset to assert increments
         ArgumentCaptor<CustomerAsset> caCaptor = ArgumentCaptor.forClass(CustomerAsset.class);
         when(customerAssetRepository.save(caCaptor.capture()))
                 .thenAnswer(inv -> inv.getArgument(0));
@@ -79,17 +76,16 @@ class OrderMatchingServiceTest {
         orderMatchingService.processOrder(1L);
 
         assertEquals(Status.MATCHED, order.getStatus());
-        assertEquals(new BigDecimal("8"), asset.getUsableSize()); // 10 - 2
-        assertEquals(new BigDecimal("5000"), customer.getCredit()); // unchanged on match
+        assertEquals(new BigDecimal("8"), asset.getUsableSize());
+        assertEquals(new BigDecimal("5000"), customer.getCredit());
 
         CustomerAsset saved = caCaptor.getValue();
         assertEquals(customer.getId(), saved.getCustomer().getId());
         assertEquals(asset.getId(), saved.getAsset().getId());
-        // new holding gets +2 size and +2 usable
+
         assertEquals(0, saved.getSize().compareTo(new BigDecimal("2")));
         assertEquals(0, saved.getUsableSize().compareTo(new BigDecimal("2")));
 
-        // success does not increment tryCount
         assertEquals(0, order.getTryCount());
         verify(orderRepository).save(order);
     }
@@ -104,7 +100,6 @@ class OrderMatchingServiceTest {
         order.setStatus(Status.PENDING);
         order.setId(2L);
 
-        // existing holding: size=3, usable=2 -> enough to sell 1
         CustomerAsset existing = TestUtils.customerAsset(customer, asset,
                 new BigDecimal("3"), new BigDecimal("2"));
 
@@ -112,19 +107,18 @@ class OrderMatchingServiceTest {
         when(assetRepository.findByIdForUpdate(asset.getId())).thenReturn(asset);
         when(customerRepository.findByIdForUpdate(customer.getId())).thenReturn(customer);
 
-        // canMatch + update path use this
+
         when(customerAssetRepository.findByCustomerAndAsset(customer, asset))
                 .thenReturn(Optional.of(existing));
 
         orderMatchingService.processOrder(2L);
 
         assertEquals(Status.MATCHED, order.getStatus());
-        // market supply increased
+
         assertEquals(new BigDecimal("11"), asset.getUsableSize());
-        // credited with 1 * 1000
+
         assertEquals(new BigDecimal("2000"), customer.getCredit());
 
-        // existing updated to size=2, usable=1
         assertEquals(0, existing.getSize().compareTo(new BigDecimal("2")));
         assertEquals(0, existing.getUsableSize().compareTo(new BigDecimal("1")));
 
@@ -152,7 +146,7 @@ class OrderMatchingServiceTest {
         orderMatchingService.processOrder(40L);
 
         assertEquals(1, order.getTryCount());
-        assertEquals(Status.PENDING, order.getStatus()); // will requeue in async path
+        assertEquals(Status.PENDING, order.getStatus());
         verify(orderRepository).save(order);
     }
 
@@ -185,15 +179,15 @@ class OrderMatchingServiceTest {
     @Test
     void processOrder_shouldCancelBuyAndRefund_onFifthFailure() {
         Customer customer = TestUtils.customer("Fail", "User");
-        Asset asset = TestUtils.asset("Memory", new BigDecimal("0"), new BigDecimal("500")); // zero supply
+        Asset asset = TestUtils.asset("Memory", new BigDecimal("0"), new BigDecimal("500"));
         Order order = TestUtils.order(customer, asset, Side.BUY, BigDecimal.ONE, new Date());
         order.setStatus(Status.PENDING);
         order.setId(5L);
-        order.setTryCount(4); // next failure cancels
+        order.setTryCount(4);
 
-        // simulate prior block at create time
-        BigDecimal blocked = asset.getInitialPrice().multiply(order.getSize()); // 500
-        customer.setCredit(customer.getCredit().subtract(blocked));             // 10000 - 500 = 9500
+
+        BigDecimal blocked = asset.getInitialPrice().multiply(order.getSize());
+        customer.setCredit(customer.getCredit().subtract(blocked));
 
         when(orderRepository.findById(5L))
                 .thenReturn(Optional.of(order))
@@ -205,7 +199,7 @@ class OrderMatchingServiceTest {
 
         assertEquals(Status.CANCELLED, order.getStatus());
         assertEquals(5, order.getTryCount());
-        // refund back to original (10000)
+
         assertEquals(new BigDecimal("10000"), customer.getCredit());
         verify(orderRepository).save(order);
     }
@@ -215,7 +209,7 @@ class OrderMatchingServiceTest {
         Customer customer = TestUtils.customer("Low", "Supply");
         customer.setCredit(new BigDecimal("5000"));
         Asset asset = TestUtils.asset("SSD", new BigDecimal("1"), new BigDecimal("1000"));
-        Order order = TestUtils.order(customer, asset, Side.BUY, new BigDecimal("2"), new Date()); // needs 2, have 1
+        Order order = TestUtils.order(customer, asset, Side.BUY, new BigDecimal("2"), new Date());
         order.setStatus(Status.PENDING);
         order.setTryCount(0);
         order.setId(3L);
@@ -227,7 +221,7 @@ class OrderMatchingServiceTest {
         orderMatchingService.processSingleOrder(3L);
 
         assertEquals(1, order.getTryCount());
-        assertEquals(Status.PENDING, order.getStatus()); // manual path doesn't requeue
+        assertEquals(Status.PENDING, order.getStatus());
         verify(orderRepository).save(order);
     }
 
@@ -238,7 +232,7 @@ class OrderMatchingServiceTest {
         Asset asset = TestUtils.asset("RAM", new BigDecimal("1"), new BigDecimal("250"));
         Order order = TestUtils.order(customer, asset, Side.BUY, new BigDecimal("2"), new Date());
         order.setStatus(Status.PENDING);
-        order.setTryCount(4); // next failure hits limit
+        order.setTryCount(4);
         order.setId(4L);
 
         when(orderRepository.findById(4L)).thenReturn(Optional.of(order));
@@ -249,7 +243,7 @@ class OrderMatchingServiceTest {
 
         assertEquals(Status.CANCELLED, order.getStatus());
         assertEquals(5, order.getTryCount());
-        assertEquals(new BigDecimal("500"), customer.getCredit()); // refund 2 * 250
+        assertEquals(new BigDecimal("500"), customer.getCredit());
         verify(orderRepository).save(order);
     }
 }

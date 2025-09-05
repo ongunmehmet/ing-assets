@@ -1,6 +1,6 @@
 package com.creditmodule.ing.controller;
 
-import com.creditmodule.ing.entity.Customer;
+import com.creditmodule.ing.data.CustomerDetailDto;
 
 import com.creditmodule.ing.service.UserCustomerService;
 
@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/v1/customers")
 @AllArgsConstructor
@@ -31,8 +33,8 @@ public class CustomerController {
     })
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
-    public ResponseEntity<Customer> getCustomer(@PathVariable Long id) {
-        Customer customer = userCustomerService.findCustomerById(id);
+    public ResponseEntity<CustomerDetailDto> getCustomer(@PathVariable Long id) {
+        CustomerDetailDto customer = userCustomerService.findCustomerById(id);
         return ResponseEntity.ok(customer);
 
     }
@@ -56,8 +58,15 @@ public class CustomerController {
     })
     @GetMapping("/getaccount/{accountNumber}")
     @PreAuthorize("hasRole('ADMIN') or #request.accountNumber == authentication.principal.username")
-    public ResponseEntity<Customer> getCustomerWithAccountNumber(@PathVariable String accountNumber) {
-        Customer customer = userCustomerService.findCustomerWithAccountNumber(accountNumber);
+    public ResponseEntity<CustomerDetailDto> getCustomerWithAccountNumber(@PathVariable String accountNumber) {
+        CustomerDetailDto customer = userCustomerService.findCustomerWithAccountNumber(accountNumber);
+        return ResponseEntity.ok(customer);
+    }
+
+    @GetMapping("/getaccounts")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<CustomerDetailDto>> getCustomerWithAccountNumber() {
+        List<CustomerDetailDto> customer = userCustomerService.listAll();
         return ResponseEntity.ok(customer);
     }
 }

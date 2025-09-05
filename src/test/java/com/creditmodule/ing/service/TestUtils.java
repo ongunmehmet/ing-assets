@@ -5,14 +5,21 @@ package com.creditmodule.ing.service;
 import com.creditmodule.ing.data.CreateAssetRequest;
 import com.creditmodule.ing.data.CreateOrderRequest;
 import com.creditmodule.ing.data.UserCustomerCreateRequest;
-import com.creditmodule.ing.entity.*;
 
+import com.creditmodule.ing.entity.Asset;
+import com.creditmodule.ing.entity.Customer;
+import com.creditmodule.ing.entity.CustomerAsset;
+import com.creditmodule.ing.entity.CustomerAssetId;
+import com.creditmodule.ing.entity.Order;
+import com.creditmodule.ing.entity.User;
 import com.creditmodule.ing.enums.Role;
 import com.creditmodule.ing.enums.Side;
 import com.creditmodule.ing.enums.Status;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Date;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class TestUtils {
@@ -124,7 +131,7 @@ public class TestUtils {
         asset.setId(ThreadLocalRandom.current().nextLong(1, 100));
         asset.setAssetName(name);
         asset.setSize(size);
-        asset.setUsableSize(size); // full usable by default
+        asset.setUsableSize(size);
         asset.setInitialPrice(price);
         return asset;
     }

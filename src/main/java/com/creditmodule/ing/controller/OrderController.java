@@ -3,8 +3,8 @@ package com.creditmodule.ing.controller;
 import com.creditmodule.ing.data.CreateOrderRequest;
 import com.creditmodule.ing.data.CreateOrderResponse;
 import com.creditmodule.ing.data.DeleteOrderResponse;
-import com.creditmodule.ing.data.ListOrdersResponse;
-import com.creditmodule.ing.entity.Order;
+import com.creditmodule.ing.data.OrderDetailDto;
+import com.creditmodule.ing.data.OrderListDto;
 import com.creditmodule.ing.service.IOrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
-import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/orders")
@@ -35,20 +35,20 @@ public class OrderController {
 
     @GetMapping("/list/{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
-    public ResponseEntity<ListOrdersResponse> listOrders(
+    public ResponseEntity<OrderListDto> listOrders(
             @PathVariable Long id,
             @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") Date startDate,
             @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") Date endDate) {
 
-        ListOrdersResponse response = orderService.listOrders(id, startDate, endDate);
+        OrderListDto response = orderService.listOrders(id, startDate, endDate);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/show/{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
-    public ResponseEntity<Optional<Order>> findOrder(
+    public ResponseEntity<OrderDetailDto> findOrder(
             @PathVariable Long id) {
-        Optional<Order> response = orderService.findOrder(id);
+        OrderDetailDto response = orderService.findOrder(id);
         return ResponseEntity.ok(response);
     }
 

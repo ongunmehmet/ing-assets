@@ -1,19 +1,23 @@
 package com.creditmodule.ing.service;
 
-import com.creditmodule.ing.data.*;
-import com.creditmodule.ing.entity.Asset;
+
+
+import com.creditmodule.ing.data.AssetDetailDto;
+import com.creditmodule.ing.data.CreateAssetRequest;
+import com.creditmodule.ing.data.CreateAssetResponse;
+import com.creditmodule.ing.data.CustomerAssetResponse;
+import com.creditmodule.ing.data.DeleteAssetResponse;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface IAssetService {
     CreateAssetResponse createAsset(CreateAssetRequest request);
 
-    List<Asset> listAllAssets();
+    List<AssetDetailDto> listAllAssets();
 
     List<CustomerAssetResponse> listCustomerAssets(Long customerId);
 
     DeleteAssetResponse deleteAsset(Long assetId);
 
-    Optional<Asset> findAssetById(Long id);
+    AssetDetailDto findAssetById(Long id);
 }

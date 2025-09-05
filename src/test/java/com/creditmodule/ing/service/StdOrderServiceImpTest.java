@@ -1,5 +1,7 @@
 package com.creditmodule.ing.service;
 
+import com.creditmodule.ing.data.OrderDetailDto;
+import com.creditmodule.ing.data.OrderListDto;
 import com.creditmodule.ing.entity.Order;
 import com.creditmodule.ing.enums.Side;
 import com.creditmodule.ing.enums.Status;
@@ -17,13 +19,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class StdOrderServiceImpTest {
@@ -93,22 +92,30 @@ class StdOrderServiceImpTest {
     }
 
     @Test
-    void listOrders_shouldReturnOrdersWithinDateRange() {
+    void listOrders_shouldReturnOrderDetailDtosWithinDateRange() {
         var customerId = 1L;
         var asset = TestUtils.asset("GPU", BigDecimal.valueOf(5), BigDecimal.valueOf(3000));
         var customer = TestUtils.customer("Alice", "Dev");
 
         var today = new Date();
         var order1 = TestUtils.order(customer, asset, Side.SELL, BigDecimal.ONE, today);
+        order1.setId(101L);
         var order2 = TestUtils.order(customer, asset, Side.BUY, BigDecimal.valueOf(2), today);
+        order2.setId(102L);
 
         when(orderRepository.findByCustomerIdAndCreateDateBetween(eq(customerId), any(), any()))
                 .thenReturn(List.of(order1, order2));
 
-        var response = orderService.listOrders(customerId, today, today);
+        OrderListDto response = orderService.listOrders(customerId, today, today);
 
-        assertEquals(2, response.getOrders().size());
-        assertEquals("GPU", response.getOrders().get(0).getAssetName());
+        assertNotNull(response);
+        assertEquals(2, response.orders().size());
+
+        OrderDetailDto first = response.orders().getFirst();
+        assertEquals(101L, first.id());
+        assertEquals("GPU", first.asset().assetName());
+        assertEquals(Side.SELL, first.side());
+        assertEquals(Status.PENDING, first.status());
     }
 
     @Test
@@ -145,26 +152,33 @@ class StdOrderServiceImpTest {
     }
 
     @Test
-    void findOrder_shouldReturnOrder_whenExists() {
+    void findOrder_shouldReturnOrderDetailDto_whenExists() {
         var asset = TestUtils.asset("Keyboard", BigDecimal.ONE, BigDecimal.valueOf(100));
         var customer = TestUtils.customer("User", "Dev");
         var order = TestUtils.order(customer, asset, Side.SELL, BigDecimal.ONE, new Date());
         order.setId(99L);
+        order.setTryCount(2); // to check mapping
 
         when(orderRepository.findById(99L)).thenReturn(Optional.of(order));
 
-        var result = orderService.findOrder(99L);
+        OrderDetailDto dto = orderService.findOrder(99L);
 
-        assertTrue(result.isPresent());
-        assertEquals("Keyboard", result.get().getAsset().getAssetName());
+        assertNotNull(dto);
+        assertEquals(99L, dto.id());
+        assertEquals(Side.SELL, dto.side());
+        assertEquals(Status.PENDING, dto.status());
+        assertEquals(BigDecimal.ONE, dto.size());
+        assertEquals(2, dto.tryCount());
+        assertEquals(customer.getId(), dto.customer().id());
+        assertEquals(customer.getName(), dto.customer().name());
+        assertEquals(customer.getSurname(), dto.customer().surname());
+        assertEquals(asset.getId(), dto.asset().id());
+        assertEquals(asset.getAssetName(), dto.asset().assetName());
     }
 
     @Test
-    void findOrder_shouldReturnEmpty_whenNotFound() {
+    void findOrder_shouldThrow_whenNotFound() {
         when(orderRepository.findById(88L)).thenReturn(Optional.empty());
-
-        var result = orderService.findOrder(88L);
-
-        assertTrue(result.isEmpty());
+        assertThrows(RuntimeException.class, () -> orderService.findOrder(88L));
     }
 }

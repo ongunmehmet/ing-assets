@@ -2,7 +2,6 @@ package com.creditmodule.ing.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,10 +33,9 @@ public class Customer {
 
     private String surname;
     @ColumnDefault("10000")
-    private BigDecimal credit = new BigDecimal("10000.00");;
+    private BigDecimal credit = new BigDecimal("10000.00");
 
-    private BigDecimal usedCredit; // Already spent
-
+    private BigDecimal usedCredit;
 
     @OneToOne
     @JsonIgnore
@@ -47,10 +45,8 @@ public class Customer {
     private User user;
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("customer-assets")
     private List<CustomerAsset> customerAssets = new ArrayList<>();
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
     private List<Order> orders = new ArrayList<>();
 }

@@ -3,7 +3,10 @@ package com.creditmodule.ing.service;
 import com.creditmodule.ing.data.CreateOrderRequest;
 import com.creditmodule.ing.data.CreateOrderResponse;
 import com.creditmodule.ing.data.DeleteOrderResponse;
-import com.creditmodule.ing.data.ListOrdersResponse;
+import com.creditmodule.ing.data.OrderAssetLineDto;
+import com.creditmodule.ing.data.OrderCustomerLineDto;
+import com.creditmodule.ing.data.OrderDetailDto;
+import com.creditmodule.ing.data.OrderListDto;
 import com.creditmodule.ing.entity.Asset;
 import com.creditmodule.ing.entity.Customer;
 import com.creditmodule.ing.entity.Order;
@@ -20,7 +23,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -77,20 +79,31 @@ public class StdOrderServiceImp implements IOrderService {
     }
 
     @Override
-    public ListOrdersResponse listOrders(Long customerId, Date startDate, Date endDate) {
-        List<Order> orders = orderRepository.findByCustomerIdAndCreateDateBetween(customerId, startDate, endDate);
+    public OrderListDto listOrders(Long customerId, Date startDate, Date endDate) {
+        List<Order> orders =
+                orderRepository.findByCustomerIdAndCreateDateBetween(customerId, startDate, endDate);
 
-        List<ListOrdersResponse.OrderDto> orderDtos = orders.stream()
-                .map(order -> new ListOrdersResponse.OrderDto(
+        List<OrderDetailDto> details = orders.stream()
+                .map(order -> new OrderDetailDto(
                         order.getId(),
-                        order.getAsset().getAssetName(),
                         order.getOrderSide(),
                         order.getStatus(),
                         order.getSize(),
-                        order.getCreateDate()
-                )).toList();
+                        order.getCreateDate(),
+                        order.getTryCount(),
+                        new OrderCustomerLineDto(
+                                order.getCustomer().getId(),
+                                order.getCustomer().getName(),
+                                order.getCustomer().getSurname()
+                        ),
+                        new OrderAssetLineDto(
+                                order.getAsset().getId(),
+                                order.getAsset().getAssetName()
+                        )
+                ))
+                .toList();
 
-        return new ListOrdersResponse(orderDtos);
+        return new OrderListDto(details);
     }
 
     @Override
@@ -120,8 +133,27 @@ public class StdOrderServiceImp implements IOrderService {
     }
 
     @Override
-    public Optional<Order> findOrder(Long id) {
-        return orderRepository.findById(id);
+    public OrderDetailDto findOrder(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        return new OrderDetailDto(
+                order.getId(),
+                order.getOrderSide(),
+                order.getStatus(),
+                order.getSize(),
+                order.getCreateDate(),
+                order.getTryCount(),
+                new OrderCustomerLineDto(
+                        order.getCustomer().getId(),
+                        order.getCustomer().getName(),
+                        order.getCustomer().getSurname()
+                ),
+                new OrderAssetLineDto(
+                        order.getAsset().getId(),
+                        order.getAsset().getAssetName()
+                )
+        );
     }
 }
 

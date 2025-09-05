@@ -1,29 +1,33 @@
 package com.creditmodule.ing.service;
 
+
+import com.creditmodule.ing.data.AssetDetailDto;
 import com.creditmodule.ing.data.CreateAssetRequest;
 import com.creditmodule.ing.data.CreateAssetResponse;
 import com.creditmodule.ing.data.CustomerAssetResponse;
 import com.creditmodule.ing.data.DeleteAssetResponse;
 import com.creditmodule.ing.entity.Asset;
 import com.creditmodule.ing.entity.Customer;
+import com.creditmodule.ing.mapper.ApiMapper;
 import com.creditmodule.ing.repository.AssetRepository;
 import com.creditmodule.ing.repository.CustomerRepository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
 @AllArgsConstructor
 public class StdAssetServiceImp implements IAssetService {
-    private AssetRepository assetRepository;
-    private CustomerRepository customerRepository;
+    private final AssetRepository assetRepository;
+    private final CustomerRepository customerRepository;
 
     @Override
+    @Transactional
     public CreateAssetResponse createAsset(CreateAssetRequest request) {
         try {
             Asset asset = new Asset();
@@ -47,11 +51,16 @@ public class StdAssetServiceImp implements IAssetService {
     }
 
     @Override
-    public List<Asset> listAllAssets() {
-        return assetRepository.findAll();
+    @Transactional(readOnly = true)
+    public List<AssetDetailDto> listAllAssets() {
+        return assetRepository.findAll()
+                .stream()
+                .map(ApiMapper::toAssetDetail)
+                .toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CustomerAssetResponse> listCustomerAssets(Long customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
@@ -67,11 +76,12 @@ public class StdAssetServiceImp implements IAssetService {
     }
 
     @Override
+    @Transactional
     public DeleteAssetResponse deleteAsset(Long assetId) {
         Asset asset = assetRepository.findById(assetId)
                 .orElseThrow(() -> new RuntimeException("Asset not found"));
 
-        if (asset.getSize() != asset.getUsableSize()) {
+        if (asset.getSize().compareTo(asset.getUsableSize()) != 0) {
             throw new IllegalStateException("Asset cannot be deleted because some of it is in use");
         }
 
@@ -84,7 +94,10 @@ public class StdAssetServiceImp implements IAssetService {
     }
 
     @Override
-    public Optional<Asset> findAssetById(Long id) {
-        return assetRepository.findById(id);
+    @Transactional(readOnly = true)
+    public AssetDetailDto findAssetById(Long id) {
+        Asset asset = assetRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Asset not found"));
+        return ApiMapper.toAssetDetail(asset);
     }
 }

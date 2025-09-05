@@ -1,5 +1,6 @@
 package com.creditmodule.ing.service;
 
+import com.creditmodule.ing.data.AssetDetailDto;
 import com.creditmodule.ing.repository.AssetRepository;
 import com.creditmodule.ing.repository.CustomerRepository;
 import org.junit.jupiter.api.Test;
@@ -13,14 +14,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class StdAssetServiceImpTest {
@@ -87,7 +83,7 @@ public class StdAssetServiceImpTest {
     }
 
     @Test
-    void findAllAssets_shouldReturnTwoAssets() {
+    void listAllAssets_shouldReturnTwoAssetDtos() {
         var a1 = TestUtils.asset("Asset1", BigDecimal.valueOf(2), BigDecimal.valueOf(500));
         var a2 = TestUtils.asset("Asset2", BigDecimal.valueOf(3), BigDecimal.valueOf(1000));
 
@@ -95,7 +91,13 @@ public class StdAssetServiceImpTest {
 
         var result = assetService.listAllAssets();
 
+        assertNotNull(result);
         assertEquals(2, result.size());
+
+        AssetDetailDto d1 = result.getFirst();
+        assertEquals("Asset1", d1.assetName());
+        assertEquals(BigDecimal.valueOf(2), d1.size());
+        assertEquals(BigDecimal.valueOf(2), d1.usableSize());
     }
 
     @Test
@@ -115,29 +117,34 @@ public class StdAssetServiceImpTest {
 
         var result = assetService.listCustomerAssets(1L);
 
+        assertNotNull(result);
         assertEquals(2, result.size());
+        assertEquals("Asset1", result.get(0).getAssetName());
+        assertEquals("Asset2", result.get(1).getAssetName());
     }
 
     @Test
-    void findAssetById_shouldReturnAsset_whenExists() {
+    void findAssetById_shouldReturnAssetDetail_whenExists() {
         var asset = TestUtils.asset("Switch", BigDecimal.valueOf(5), BigDecimal.valueOf(2000));
         asset.setId(99L);
 
         when(assetRepository.findById(99L)).thenReturn(Optional.of(asset));
 
-        var result = assetService.findAssetById(99L);
+        var dto = assetService.findAssetById(99L);
 
-        assertTrue(result.isPresent());
-        assertEquals("Switch", result.get().getAssetName());
-        assertEquals(BigDecimal.valueOf(5), result.get().getSize());
+        assertNotNull(dto);
+        assertEquals(99L, dto.id());
+        assertEquals("Switch", dto.assetName());
+        assertEquals(BigDecimal.valueOf(5), dto.size());
+        assertEquals(BigDecimal.valueOf(5), dto.usableSize());
+        assertEquals(BigDecimal.valueOf(2000), dto.initialPrice());
     }
 
     @Test
-    void findAssetById_shouldReturnEmpty_whenNotFound() {
+    void findAssetById_shouldThrow_whenNotFound() {
         when(assetRepository.findById(100L)).thenReturn(Optional.empty());
 
-        var result = assetService.findAssetById(100L);
-
-        assertTrue(result.isEmpty());
+        var ex = assertThrows(RuntimeException.class, () -> assetService.findAssetById(100L));
+        assertTrue(ex.getMessage().toLowerCase().contains("asset not found"));
     }
 }

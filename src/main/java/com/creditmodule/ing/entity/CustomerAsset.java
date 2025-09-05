@@ -1,6 +1,6 @@
 package com.creditmodule.ing.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -17,7 +17,6 @@ public class CustomerAsset {
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("customerId")
     @JoinColumn(name = "customer_id")
-    @JsonBackReference("customer-assets")
     private Customer customer;
 
     @ManyToOne(fetch = FetchType.LAZY)
