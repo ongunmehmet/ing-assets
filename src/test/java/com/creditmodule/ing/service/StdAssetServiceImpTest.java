@@ -31,8 +31,8 @@ public class StdAssetServiceImpTest {
 
     @Test
     void createAsset_shouldSucceed_whenNameIsUnique() {
-        var request = TestUtils.createAssetRequest("Laptop", BigDecimal.TEN, BigDecimal.valueOf(5000));
-        var asset = TestUtils.asset("Laptop", BigDecimal.TEN, BigDecimal.valueOf(5000));
+        var request = TestUtils.createAssetRequest("BTC", BigDecimal.TEN, BigDecimal.valueOf(5000));
+        var asset = TestUtils.asset("BTC", BigDecimal.TEN, BigDecimal.valueOf(5000));
         asset.setId(1L);
 
         when(assetRepository.save(any())).thenReturn(asset);
@@ -41,7 +41,7 @@ public class StdAssetServiceImpTest {
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
-        assertEquals("Laptop", result.getAssetName());
+        assertEquals("BTC", result.getAssetName());
         assertEquals(BigDecimal.TEN, result.getSize());
         assertEquals(BigDecimal.TEN, result.getUsableSize());
         assertEquals("Asset created successfully", result.getMessage());
@@ -49,19 +49,19 @@ public class StdAssetServiceImpTest {
 
     @Test
     void createAsset_shouldFail_whenNameAlreadyExists_dueToConstraintViolation() {
-        var request = TestUtils.createAssetRequest("Laptop", BigDecimal.TEN, BigDecimal.valueOf(5000));
+        var request = TestUtils.createAssetRequest("BTC", BigDecimal.TEN, BigDecimal.valueOf(5000));
 
         when(assetRepository.save(any())).thenThrow(new DataIntegrityViolationException("Unique constraint violation"));
 
         var exception = assertThrows(IllegalArgumentException.class, () -> assetService.createAsset(request));
-        assertTrue(exception.getMessage().contains("Laptop"));
+        assertTrue(exception.getMessage().contains("BTC"));
 
         verify(assetRepository).save(any());
     }
 
     @Test
     void deleteAsset_shouldSucceed_whenUsableSizeEqualsSize() {
-        var asset = TestUtils.asset("Monitor", BigDecimal.valueOf(5), BigDecimal.valueOf(1500));
+        var asset = TestUtils.asset("GOOGL", BigDecimal.valueOf(5), BigDecimal.valueOf(1500));
         asset.setId(1L);
         asset.setSize(BigDecimal.valueOf(5));
         asset.setUsableSize(BigDecimal.valueOf(5));
@@ -75,7 +75,7 @@ public class StdAssetServiceImpTest {
 
     @Test
     void deleteAsset_shouldFail_whenUsableSizeDiffersFromSize() {
-        var asset = TestUtils.asset("Monitor", BigDecimal.TEN, BigDecimal.valueOf(1500));
+        var asset = TestUtils.asset("GOOGL", BigDecimal.TEN, BigDecimal.valueOf(1500));
         asset.setId(2L);
         asset.setUsableSize(BigDecimal.valueOf(5));
 

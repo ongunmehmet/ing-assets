@@ -42,13 +42,13 @@ class StdOrderServiceImpTest {
 
     @Test
     void createOrder_shouldSucceed_whenBuyOrderAndCreditSufficient() {
-        var request = TestUtils.createOrderRequest(1L, "Laptop", Side.BUY, BigDecimal.valueOf(2));
-        var customer = TestUtils.customer("John", "Doe");
+        var request = TestUtils.createOrderRequest(1L, "BTC", Side.BUY, BigDecimal.valueOf(2));
+        var customer = TestUtils.customer("Test", "User");
         customer.setCredit(BigDecimal.valueOf(10_000));
-        var asset = TestUtils.asset("Laptop", BigDecimal.valueOf(10), BigDecimal.valueOf(1000));
+        var asset = TestUtils.asset("BTC", BigDecimal.valueOf(10), BigDecimal.valueOf(1000));
 
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
-        when(assetRepository.findByAssetName("Laptop")).thenReturn(Optional.of(asset));
+        when(assetRepository.findByAssetName("BTC")).thenReturn(Optional.of(asset));
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> {
             Order o = inv.getArgument(0);
             o.setId(10L);
@@ -58,7 +58,7 @@ class StdOrderServiceImpTest {
         var response = orderService.createOrder(request);
 
         assertEquals(10L, response.getOrderId());
-        assertEquals("Laptop", response.getAssetName());
+        assertEquals("BTC", response.getAssetName());
         assertEquals(Status.PENDING, response.getStatus());
         assertEquals(Side.BUY, response.getOrderSide());
         assertEquals(BigDecimal.valueOf(2000), response.getTotalValue());
@@ -68,13 +68,13 @@ class StdOrderServiceImpTest {
 
     @Test
     void createOrder_publishesEvent_onSuccess() {
-        var request = TestUtils.createOrderRequest(1L, "Laptop", Side.BUY, BigDecimal.valueOf(2));
-        var customer = TestUtils.customer("John", "Doe");
+        var request = TestUtils.createOrderRequest(1L, "BTC", Side.BUY, BigDecimal.valueOf(2));
+        var customer = TestUtils.customer("Test", "User");
         customer.setCredit(BigDecimal.valueOf(10_000));
-        var asset = TestUtils.asset("Laptop", BigDecimal.valueOf(10), BigDecimal.valueOf(1000));
+        var asset = TestUtils.asset("BTC", BigDecimal.valueOf(10), BigDecimal.valueOf(1000));
 
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
-        when(assetRepository.findByAssetName("Laptop")).thenReturn(Optional.of(asset));
+        when(assetRepository.findByAssetName("BTC")).thenReturn(Optional.of(asset));
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> {
             Order o = inv.getArgument(0);
             o.setId(42L);
@@ -88,7 +88,7 @@ class StdOrderServiceImpTest {
 
     @Test
     void createOrder_shouldFail_whenCustomerNotFound() {
-        var request = TestUtils.createOrderRequest(1L, "Laptop", Side.BUY, BigDecimal.valueOf(2));
+        var request = TestUtils.createOrderRequest(1L, "BTC", Side.BUY, BigDecimal.valueOf(2));
         when(customerRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> orderService.createOrder(request));
@@ -96,24 +96,24 @@ class StdOrderServiceImpTest {
 
     @Test
     void createOrder_shouldFail_whenAssetNotFound() {
-        var request = TestUtils.createOrderRequest(1L, "Laptop", Side.BUY, BigDecimal.valueOf(2));
-        var customer = TestUtils.customer("John", "Doe");
+        var request = TestUtils.createOrderRequest(1L, "BTC", Side.BUY, BigDecimal.valueOf(2));
+        var customer = TestUtils.customer("Test", "User");
 
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
-        when(assetRepository.findByAssetName("Laptop")).thenReturn(Optional.empty());
+        when(assetRepository.findByAssetName("BTC")).thenReturn(Optional.empty());
 
         assertThrows(RuntimeException.class, () -> orderService.createOrder(request));
     }
 
     @Test
     void createOrder_shouldFail_whenCreditInsufficient() {
-        var request = TestUtils.createOrderRequest(1L, "Laptop", Side.BUY, BigDecimal.valueOf(2));
-        var customer = TestUtils.customer("John", "Doe");
+        var request = TestUtils.createOrderRequest(1L, "BTC", Side.BUY, BigDecimal.valueOf(2));
+        var customer = TestUtils.customer("Test", "User");
         customer.setCredit(BigDecimal.valueOf(500)); // Not enough
-        var asset = TestUtils.asset("Laptop", BigDecimal.valueOf(10), BigDecimal.valueOf(1000));
+        var asset = TestUtils.asset("BTC", BigDecimal.valueOf(10), BigDecimal.valueOf(1000));
 
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
-        when(assetRepository.findByAssetName("Laptop")).thenReturn(Optional.of(asset));
+        when(assetRepository.findByAssetName("BTC")).thenReturn(Optional.of(asset));
 
         assertThrows(IllegalStateException.class, () -> orderService.createOrder(request));
     }
@@ -174,7 +174,7 @@ class StdOrderServiceImpTest {
 
     @Test
     void deleteOrder_shouldSucceed_whenPendingBuyOrder() {
-        var asset = TestUtils.asset("Monitor", BigDecimal.valueOf(2), BigDecimal.valueOf(500));
+        var asset = TestUtils.asset("GOOGL", BigDecimal.valueOf(2), BigDecimal.valueOf(500));
         var customer = TestUtils.customer("Test", "User");
         customer.setCredit(BigDecimal.valueOf(1000));
 
@@ -186,7 +186,7 @@ class StdOrderServiceImpTest {
 
         var response = orderService.deleteOrder(15L);
 
-        assertEquals("Monitor", response.getAssetName());
+        assertEquals("GOOGL", response.getAssetName());
         assertEquals("Order cancelled successfully", response.getMessage());
         verify(orderRepository).delete(order);
         verify(customerRepository).save(customer);
@@ -194,7 +194,7 @@ class StdOrderServiceImpTest {
 
     @Test
     void deleteOrder_shouldFail_whenStatusNotPending() {
-        var asset = TestUtils.asset("Monitor", BigDecimal.valueOf(2), BigDecimal.valueOf(500));
+        var asset = TestUtils.asset("GOOGL", BigDecimal.valueOf(2), BigDecimal.valueOf(500));
         var customer = TestUtils.customer("Test", "User");
         var order = TestUtils.order(customer, asset, Side.SELL, BigDecimal.valueOf(2), new Date());
         order.setStatus(Status.MATCHED);

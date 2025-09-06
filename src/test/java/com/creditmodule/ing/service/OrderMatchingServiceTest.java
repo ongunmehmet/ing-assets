@@ -16,7 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -62,7 +61,7 @@ class OrderMatchingServiceTest {
         Customer customer = TestUtils.customer("Test", "User");
         customer.setCredit(new BigDecimal("5000"));
 
-        Asset asset = TestUtils.asset("Laptop", new BigDecimal("10"), new BigDecimal("1000"));
+        Asset asset = TestUtils.asset("BTC", new BigDecimal("10"), new BigDecimal("1000"));
         Order order = TestUtils.order(customer, asset, Side.BUY, new BigDecimal("2"), new Date());
         order.setStatus(Status.PENDING);
         order.setId(1L);
@@ -100,7 +99,7 @@ class OrderMatchingServiceTest {
         Customer customer = TestUtils.customer("Test", "User");
         customer.setCredit(new BigDecimal("1000"));
 
-        Asset asset = TestUtils.asset("Laptop", new BigDecimal("10"), new BigDecimal("1000"));
+        Asset asset = TestUtils.asset("BTC", new BigDecimal("10"), new BigDecimal("1000"));
         Order order = TestUtils.order(customer, asset, Side.SELL, BigDecimal.ONE, new Date());
         order.setStatus(Status.PENDING);
         order.setId(2L);

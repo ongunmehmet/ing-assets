@@ -28,7 +28,7 @@ class ApiMapperTest {
     @Test
     void toCustomerDetail_mapsAssetsAndOrders_flat_no_recursion() {
 
-        Customer c = TestUtils.customer("Alice", "Smith");
+        Customer c = TestUtils.customer("User", "Test");
         c.setId(1L);
         c.setCredit(new BigDecimal("9000"));
 
@@ -58,8 +58,8 @@ class ApiMapperTest {
 
 
         assertEquals(1L, dto.id());
-        assertEquals("Alice", dto.name());
-        assertEquals("Smith", dto.surname());
+        assertEquals("User", dto.name());
+        assertEquals("Test", dto.surname());
         assertEquals(0, dto.credit().compareTo(new BigDecimal("9000")));
 
 
@@ -86,7 +86,7 @@ class ApiMapperTest {
         asset.setId(10L);
         asset.setUsableSize(new BigDecimal("80"));
 
-        Customer c1 = TestUtils.customer("Alice", "Smith"); c1.setId(1L);
+        Customer c1 = TestUtils.customer("User", "Test"); c1.setId(1L);
         Customer c2 = TestUtils.customer("Bob", "Lee");     c2.setId(2L);
 
         CustomerAsset ca1 = link(c1, asset, "5", "5");
@@ -104,15 +104,15 @@ class ApiMapperTest {
         assertEquals(2, dto.holders().size());
         AssetCustomerLineDto holder1 = dto.holders().stream()
                 .filter(h -> h.customerId().equals(1L)).findFirst().orElseThrow();
-        assertEquals("Alice", holder1.customerName());
-        assertEquals("Smith", holder1.customerSurname());
+        assertEquals("User", holder1.customerName());
+        assertEquals("Test", holder1.customerSurname());
         assertEquals(0, holder1.size().compareTo(new BigDecimal("5")));
         assertEquals(0, holder1.usableSize().compareTo(new BigDecimal("5")));
     }
 
     @Test
     void toOrderDetail_mapsFlatCustomerAndAsset() {
-        Customer customer = TestUtils.customer("Alice", "Smith"); customer.setId(1L);
+        Customer customer = TestUtils.customer("User", "Test"); customer.setId(1L);
         Asset asset = TestUtils.asset("AAPL", new BigDecimal("100"), new BigDecimal("150")); asset.setId(10L);
 
         Order order = TestUtils.order(customer, asset, Side.BUY, new BigDecimal("3"), new Date());
@@ -130,8 +130,8 @@ class ApiMapperTest {
         assertNotNull(dto.createDate());
 
         assertEquals(1L, dto.customer().id());
-        assertEquals("Alice", dto.customer().name());
-        assertEquals("Smith", dto.customer().surname());
+        assertEquals("User", dto.customer().name());
+        assertEquals("Test", dto.customer().surname());
 
         assertEquals(10L, dto.asset().id());
         assertEquals("AAPL", dto.asset().assetName());

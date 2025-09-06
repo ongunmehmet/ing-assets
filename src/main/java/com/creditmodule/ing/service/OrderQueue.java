@@ -2,9 +2,6 @@ package com.creditmodule.ing.service;
 
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-
 @Component
 public class OrderQueue {
     private final java.util.concurrent.BlockingQueue<Long> queue = new java.util.concurrent.LinkedBlockingQueue<>();

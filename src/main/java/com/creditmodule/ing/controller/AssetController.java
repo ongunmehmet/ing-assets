@@ -5,7 +5,6 @@ import com.creditmodule.ing.data.CreateAssetRequest;
 import com.creditmodule.ing.data.CreateAssetResponse;
 import com.creditmodule.ing.data.CustomerAssetResponse;
 import com.creditmodule.ing.service.IAssetService;
-import com.creditmodule.ing.service.IOrderService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,9 +22,6 @@ public class AssetController {
 
     @Autowired
     private IAssetService assetService;
-    @Autowired
-    private IOrderService orderService;
-
 
     @PostMapping("/createAsset")
     @PreAuthorize("hasRole('ADMIN')")
