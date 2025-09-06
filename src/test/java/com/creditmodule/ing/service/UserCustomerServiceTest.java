@@ -78,19 +78,17 @@ public class UserCustomerServiceTest {
 
     @Test
     void testFindCustomerById_Success() {
-        // Arrange
+
         when(customerRepository.findById(1L)).thenReturn(Optional.of(mockCustomer));
 
-        // Act
         CustomerDetailDto dto = userCustomerService.findCustomerById(1L);
 
-        // Assert
         assertNotNull(dto);
         assertEquals(mockCustomer.getId(), dto.id());
         assertEquals(mockCustomer.getName(), dto.name());
         assertEquals(mockCustomer.getSurname(), dto.surname());
         assertEquals(mockCustomer.getCredit(), dto.credit());
-        // assets/orders may be empty depending on your TestUtils setup:
+
         assertNotNull(dto.assets());
         assertNotNull(dto.orders());
         verify(customerRepository).findById(1L);
@@ -158,7 +156,6 @@ public class UserCustomerServiceTest {
 
     @Test
     void testListAllCustomers_ReturnsMappedDtos() {
-        // Arrange: build two lightweight customers (with initialized collections)
         Customer c1 = TestUtils.customer("Alice", "One");
         c1.setCustomerAssets(new ArrayList<>());
         c1.setOrders(new ArrayList<>());
@@ -181,7 +178,6 @@ public class UserCustomerServiceTest {
         assertNotNull(d1.assets());
         assertNotNull(d1.orders());
 
-        // Verify second
         CustomerDetailDto d2 = result.get(1);
         assertEquals(c2.getId(), d2.id());
         assertEquals("Bob", d2.name());

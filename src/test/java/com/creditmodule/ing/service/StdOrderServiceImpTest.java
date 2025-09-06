@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -27,11 +28,17 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class StdOrderServiceImpTest {
 
-    @Mock private CustomerRepository customerRepository;
-    @Mock private AssetRepository assetRepository;
-    @Mock private OrderRepository orderRepository;
+    @Mock
+    private CustomerRepository customerRepository;
+    @Mock
+    private AssetRepository assetRepository;
+    @Mock
+    private OrderRepository orderRepository;
+    @Mock
+    private ApplicationEventPublisher publisher;
 
-    @InjectMocks private StdOrderServiceImp orderService;
+    @InjectMocks
+    private StdOrderServiceImp orderService;
 
     @Test
     void createOrder_shouldSucceed_whenBuyOrderAndCreditSufficient() {
@@ -57,6 +64,26 @@ class StdOrderServiceImpTest {
         assertEquals(BigDecimal.valueOf(2000), response.getTotalValue());
         verify(customerRepository).save(customer);
         verify(orderRepository).save(any(Order.class));
+    }
+
+    @Test
+    void createOrder_publishesEvent_onSuccess() {
+        var request = TestUtils.createOrderRequest(1L, "Laptop", Side.BUY, BigDecimal.valueOf(2));
+        var customer = TestUtils.customer("John", "Doe");
+        customer.setCredit(BigDecimal.valueOf(10_000));
+        var asset = TestUtils.asset("Laptop", BigDecimal.valueOf(10), BigDecimal.valueOf(1000));
+
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(assetRepository.findByAssetName("Laptop")).thenReturn(Optional.of(asset));
+        when(orderRepository.save(any(Order.class))).thenAnswer(inv -> {
+            Order o = inv.getArgument(0);
+            o.setId(42L);
+            return o;
+        });
+
+        orderService.createOrder(request);
+
+        verify(publisher).publishEvent(any(Object.class));
     }
 
     @Test

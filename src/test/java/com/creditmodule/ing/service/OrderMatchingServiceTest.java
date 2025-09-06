@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -32,10 +33,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OrderMatchingServiceTest {
 
-    @Mock private OrderRepository orderRepository;
-    @Mock private AssetRepository assetRepository;
-    @Mock private CustomerRepository customerRepository;
-    @Mock private CustomerAssetRepository customerAssetRepository;
+    @Mock
+    private OrderRepository orderRepository;
+    @Mock
+    private AssetRepository assetRepository;
+    @Mock
+    private CustomerRepository customerRepository;
+    @Mock
+    private CustomerAssetRepository customerAssetRepository;
 
     private OrderQueue orderQueue;
     private OrderMatchingService orderMatchingService;

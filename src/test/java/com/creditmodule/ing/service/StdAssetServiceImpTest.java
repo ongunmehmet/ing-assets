@@ -21,10 +21,13 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class StdAssetServiceImpTest {
 
-    @Mock private AssetRepository assetRepository;
-    @Mock private CustomerRepository customerRepository;
+    @Mock
+    private AssetRepository assetRepository;
+    @Mock
+    private CustomerRepository customerRepository;
 
-    @InjectMocks private StdAssetServiceImp assetService;
+    @InjectMocks
+    private StdAssetServiceImp assetService;
 
     @Test
     void createAsset_shouldSucceed_whenNameIsUnique() {
