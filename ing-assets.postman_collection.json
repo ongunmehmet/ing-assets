@@ -1,0 +1,439 @@
+{
+	"info": {
+		"_postman_id": "65b8753b-c373-4722-82f8-1b6a74314e9f",
+		"name": "ing-assets",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "48118929",
+		"_collection_link": "https://ongunmehmet21-2794923.postman.co/workspace/ing-assets~09c939ef-b3e3-4c0d-bc4f-0c0f7cfb8eea/collection/48118929-65b8753b-c373-4722-82f8-1b6a74314e9f?action=share&source=collection_link&creator=48118929"
+	},
+	"item": [
+		{
+			"name": "New Request",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"surname\": \"admin\",\r\n  \"password\": \"admin\",\r\n  \"name\": \"admin\",\r\n  \"creditLimit\": 9999\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/api/auth/register",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"accountNumber\": \"7fbc4af4-d22b-491c-8095-e3a2e1a842e9\",\r\n  \"password\": \"admin\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/api/auth/login",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create asset",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3ZmJjNGFmNC1kMjJiLTQ5MWMtODA5NS1lM2EyZTFhODQyZTkiLCJpYXQiOjE3NTcwMjE5MDMsImV4cCI6MTc1NzAyNTUwM30.5hZq1G0rNUD89sOsX-7u9H-1WXxJ8VDuer0R-F95jfQ",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"assetName\": \"BTC\",\r\n  \"initialSize\": 500,\r\n  \"initialPrice\": 1000\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/api/asset/createAsset",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"asset",
+						"createAsset"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "ShowAssetById",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3ZmJjNGFmNC1kMjJiLTQ5MWMtODA5NS1lM2EyZTFhODQyZTkiLCJpYXQiOjE3NTcwMjE5MDMsImV4cCI6MTc1NzAyNTUwM30.5hZq1G0rNUD89sOsX-7u9H-1WXxJ8VDuer0R-F95jfQ",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/asset/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"asset",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get all assets",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3ZmJjNGFmNC1kMjJiLTQ5MWMtODA5NS1lM2EyZTFhODQyZTkiLCJpYXQiOjE3NTcwMjE5MDMsImV4cCI6MTc1NzAyNTUwM30.5hZq1G0rNUD89sOsX-7u9H-1WXxJ8VDuer0R-F95jfQ",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/asset/assets/all",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"asset",
+						"assets",
+						"all"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Order Create",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3ZmJjNGFmNC1kMjJiLTQ5MWMtODA5NS1lM2EyZTFhODQyZTkiLCJpYXQiOjE3NTcwMjE5MDMsImV4cCI6MTc1NzAyNTUwM30.5hZq1G0rNUD89sOsX-7u9H-1WXxJ8VDuer0R-F95jfQ",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"customerId\": 1,\r\n  \"assetName\": \"BTC\",\r\n  \"side\": \"BUY\",\r\n  \"size\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/api/orders/create",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"orders",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "show Order",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3ZmJjNGFmNC1kMjJiLTQ5MWMtODA5NS1lM2EyZTFhODQyZTkiLCJpYXQiOjE3NTcwMjE5MDMsImV4cCI6MTc1NzAyNTUwM30.5hZq1G0rNUD89sOsX-7u9H-1WXxJ8VDuer0R-F95jfQ",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/orders/show/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"orders",
+						"show",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Match order manually",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3ZmJjNGFmNC1kMjJiLTQ5MWMtODA5NS1lM2EyZTFhODQyZTkiLCJpYXQiOjE3NTcwMjE5MDMsImV4cCI6MTc1NzAyNTUwM30.5hZq1G0rNUD89sOsX-7u9H-1WXxJ8VDuer0R-F95jfQ",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/admin/orders/match/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"orders",
+						"match",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "showCustomerByID",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxYzdlYTEyNy1mMDNiLTQzMDItYjk3MS02NzRjYWVlNmI1YmIiLCJpYXQiOjE3NTcwMjY3NTUsImV4cCI6MTc1NzAzMDM1NX0.7rabquWgKFQUGWrEQXNK7zdzh760YPAE1rN8kv6qiB4",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/v1/customers/1",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"customers",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "show Orders by Id",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI2YTEzY2ZlMS03ZDk3LTRhNzUtOTBlYi0yZjdkNDhjMjNkNzgiLCJpYXQiOjE3NTcxNTI2MjksImV4cCI6MTc1NzE1NjIyOX0.7O8O7JAjg4jWsmINFAo9CUA1HIbh6NqhwIQp5NuOOKY",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/orders/list/1?startDate=06-09-2025&endDate=07-09-2025",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"orders",
+						"list",
+						"1"
+					],
+					"query": [
+						{
+							"key": "startDate",
+							"value": "06-09-2025"
+						},
+						{
+							"key": "endDate",
+							"value": "07-09-2025"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "show aLLOrder",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI4ZWE1MmY5My02NGFjLTQ4NWItYTk2MS02YmE3ZWZmMGZkZGEiLCJpYXQiOjE3NTcxNTc1NjksImV4cCI6MTc1NzE2MTE2OX0.K7o1jyYh56aZN1omOxN_gF4o5l3koWC7APr84IPOS7M",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/api/orders/listall",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"orders",
+						"listall"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Matche Order paralel",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3NDQxMmZhYS0xMGExLTQzN2YtOGNmMi1jMWRhYmE0ODc2OWQiLCJpYXQiOjE3NTcxNTk3NzQsImV4cCI6MTc1NzE2MzM3M30.S0PxqcZkxIyI8uuROD7fPLOjx1pGXdhr-7C-5yO9faQ",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/admin/orders/start-matching",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"orders",
+						"start-matching"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Matche Order paralel stop",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3NDQxMmZhYS0xMGExLTQzN2YtOGNmMi1jMWRhYmE0ODc2OWQiLCJpYXQiOjE3NTcxNTk3NzQsImV4cCI6MTc1NzE2MzM3M30.S0PxqcZkxIyI8uuROD7fPLOjx1pGXdhr-7C-5yO9faQ",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/admin/orders/stop-matching",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"admin",
+						"orders",
+						"stop-matching"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
