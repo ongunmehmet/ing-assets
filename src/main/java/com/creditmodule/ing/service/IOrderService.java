@@ -13,6 +13,8 @@ public interface IOrderService {
 
     OrderListDto listOrders(Long customerId, Date startDate, Date endDate);
 
+    OrderListDto listAllOrders();
+
     DeleteOrderResponse deleteOrder(Long orderId);
 
     OrderDetailDto findOrder(Long id);

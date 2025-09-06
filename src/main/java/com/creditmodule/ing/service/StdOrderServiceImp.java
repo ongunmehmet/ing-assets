@@ -4,6 +4,7 @@ import com.creditmodule.ing.data.CreateOrderRequest;
 import com.creditmodule.ing.data.CreateOrderResponse;
 import com.creditmodule.ing.data.DeleteOrderResponse;
 import com.creditmodule.ing.data.OrderAssetLineDto;
+import com.creditmodule.ing.data.OrderCreatedEvent;
 import com.creditmodule.ing.data.OrderCustomerLineDto;
 import com.creditmodule.ing.data.OrderDetailDto;
 import com.creditmodule.ing.data.OrderListDto;
@@ -18,6 +19,7 @@ import com.creditmodule.ing.repository.OrderRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -32,30 +34,31 @@ public class StdOrderServiceImp implements IOrderService {
     private final CustomerRepository customerRepository;
     private final AssetRepository assetRepository;
     private final OrderRepository orderRepository;
+    private final MatchingSwitch matchingSwitch;
+    private final OrderQueue orderQueue;
+    private final ApplicationEventPublisher publisher;
 
     @Override
     @Transactional
     public CreateOrderResponse createOrder(CreateOrderRequest request) {
-
         Customer customer = customerRepository.findById(request.getCustomerId())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
         Asset asset = assetRepository.findByAssetName(request.getAssetName())
                 .orElseThrow(() -> new RuntimeException("Asset not found"));
 
-        BigDecimal price = asset.getInitialPrice();
-        BigDecimal totalValue = request.getSize().multiply(price);
+        var price = asset.getInitialPrice();
+        var totalValue = request.getSize().multiply(price);
 
         if (request.getSide() == Side.BUY && customer.getCredit().compareTo(totalValue) < 0) {
             throw new IllegalStateException("Insufficient credit for this order");
         }
 
         if (request.getSide() == Side.BUY) {
-            customer.setCredit(customer.getCredit().subtract(totalValue));
+            customer.setCredit(customer.getCredit().subtract(totalValue)); // block funds
             customerRepository.save(customer);
         }
 
-        // Create order
         Order order = new Order();
         order.setCustomer(customer);
         order.setAsset(asset);
@@ -63,8 +66,9 @@ public class StdOrderServiceImp implements IOrderService {
         order.setSize(request.getSize());
         order.setStatus(Status.PENDING);
         order.setCreateDate(new Date());
-
         orderRepository.save(order);
+
+        publisher.publishEvent(new OrderCreatedEvent(order.getId()));
 
         return new CreateOrderResponse(
                 order.getId(),
@@ -82,6 +86,34 @@ public class StdOrderServiceImp implements IOrderService {
     public OrderListDto listOrders(Long customerId, Date startDate, Date endDate) {
         List<Order> orders =
                 orderRepository.findByCustomerIdAndCreateDateBetween(customerId, startDate, endDate);
+
+        List<OrderDetailDto> details = orders.stream()
+                .map(order -> new OrderDetailDto(
+                        order.getId(),
+                        order.getOrderSide(),
+                        order.getStatus(),
+                        order.getSize(),
+                        order.getCreateDate(),
+                        order.getTryCount(),
+                        new OrderCustomerLineDto(
+                                order.getCustomer().getId(),
+                                order.getCustomer().getName(),
+                                order.getCustomer().getSurname()
+                        ),
+                        new OrderAssetLineDto(
+                                order.getAsset().getId(),
+                                order.getAsset().getAssetName()
+                        )
+                ))
+                .toList();
+
+        return new OrderListDto(details);
+    }
+
+    @Override
+    public OrderListDto listAllOrders() {
+        List<Order> orders =
+                orderRepository.findAll();
 
         List<OrderDetailDto> details = orders.stream()
                 .map(order -> new OrderDetailDto(

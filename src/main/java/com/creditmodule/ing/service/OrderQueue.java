@@ -7,14 +7,19 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 @Component
 public class OrderQueue {
-    private final BlockingQueue<Long> queue = new LinkedBlockingQueue<>();
+    private final java.util.concurrent.BlockingQueue<Long> queue = new java.util.concurrent.LinkedBlockingQueue<>();
+    private final java.util.Set<Long> enqueued = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
-    public void addOrder(Long orderId) {
-        queue.offer(orderId);
+    public boolean addOrder(Long orderId) {
+        if (enqueued.add(orderId)) {
+            return queue.offer(orderId);
+        }
+        return false;
     }
 
     public Long takeOrder() throws InterruptedException {
-        return queue.take();
+        Long id = queue.take();
+        enqueued.remove(id);
+        return id;
     }
-
 }

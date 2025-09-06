@@ -2,6 +2,7 @@ package com.creditmodule.ing.controller;
 
 import com.creditmodule.ing.enums.Status;
 import com.creditmodule.ing.repository.OrderRepository;
+import com.creditmodule.ing.service.MatchingSwitch;
 import com.creditmodule.ing.service.OrderMatchingService;
 import com.creditmodule.ing.service.OrderQueue;
 import com.creditmodule.ing.service.OrderWorker;
@@ -22,6 +23,7 @@ public class OrderMatchingController {
     private final OrderQueue orderQueue;
     private final OrderRepository orderRepository;
     private final OrderMatchingService orderMatchingService;
+    private final MatchingSwitch matchingSwitch;
 
     @PostMapping("/match/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -40,8 +42,9 @@ public class OrderMatchingController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> startMatching() {
         orderRepository.findByStatus(Status.PENDING)
-                .forEach(order -> orderQueue.addOrder(order.getId()));
+                .forEach(o -> orderQueue.addOrder(o.getId()));
 
+        matchingSwitch.turnOn();
         orderWorker.start();
         return ResponseEntity.ok("Parallel matching started");
     }
@@ -49,6 +52,7 @@ public class OrderMatchingController {
     @PostMapping("/stop-matching")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> stopMatching() {
+        matchingSwitch.turnOff();
         orderWorker.stop();
         return ResponseEntity.ok("Parallel matching stopped");
     }

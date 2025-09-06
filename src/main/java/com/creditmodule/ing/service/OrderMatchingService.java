@@ -64,7 +64,7 @@ public class OrderMatchingService {
             return;
         }
 
-        applyMatch(order, asset, customer, price); // ⬅ will update CustomerAsset too
+        applyMatch(order, asset, customer, price);
         order.setStatus(Status.MATCHED);
         orderRepository.save(order);
         log.info("Order {} matched successfully", orderId);
@@ -73,10 +73,9 @@ public class OrderMatchingService {
     private boolean canMatch(Order order, Asset asset, Customer customer) {
         BigDecimal qty = nvl(order.getSize());
         if (order.getOrderSide() == Side.BUY) {
-            // market must have enough available
+
             return nvl(asset.getUsableSize()).compareTo(qty) >= 0;
         } else {
-            // SELL: verify customer has enough usable shares
             return customerAssetRepository.findByCustomerAndAsset(customer, asset)
                     .map(ca -> nvl(ca.getUsableSize()).compareTo(qty) >= 0)
                     .orElse(false);
@@ -87,14 +86,12 @@ public class OrderMatchingService {
         BigDecimal qty = nvl(order.getSize());
 
         if (order.getOrderSide() == Side.BUY) {
-            // 1) decrease market supply
             BigDecimal newUsable = nvl(asset.getUsableSize()).subtract(qty);
             if (newUsable.compareTo(ZERO) < 0) {
                 throw new IllegalStateException("Not enough asset shares available");
             }
             asset.setUsableSize(newUsable);
 
-            // 2) upsert CustomerAsset (increase size & usableSize)
             CustomerAsset ca = customerAssetRepository.findByCustomerAndAsset(customer, asset)
                     .orElseGet(() -> {
                         CustomerAssetId id = new CustomerAssetId();
@@ -113,10 +110,9 @@ public class OrderMatchingService {
             ca.setUsableSize(nvl(ca.getUsableSize()).add(qty));
             customerAssetRepository.save(ca);
 
-            // NOTE: credit was already reserved at order creation for BUY; no change here.
 
-        } else { // SELL
-            // 1) fetch CustomerAsset (must exist and have enough usableSize)
+        } else {
+
             CustomerAsset ca = customerAssetRepository.findByCustomerAndAsset(customer, asset)
                     .orElseThrow(() -> new IllegalStateException("Customer does not own this asset"));
 
@@ -127,19 +123,17 @@ public class OrderMatchingService {
 
             BigDecimal newSize = nvl(ca.getSize()).subtract(qty);
 
-            // 2) update/delete holding
+
             if (newSize.compareTo(ZERO) == 0) {
-                customerAssetRepository.delete(ca); // sold out -> remove row
+                customerAssetRepository.delete(ca);
             } else {
                 ca.setSize(newSize);
                 ca.setUsableSize(newUsable);
                 customerAssetRepository.save(ca);
             }
 
-            // 3) increase market supply
             asset.setUsableSize(nvl(asset.getUsableSize()).add(qty));
 
-            // 4) credit customer proceeds (BUY reservation logic does not apply here)
             BigDecimal totalValue = qty.multiply(price);
             customer.setCredit(nvl(customer.getCredit()).add(totalValue));
         }
@@ -154,7 +148,6 @@ public class OrderMatchingService {
         if (nextTry >= 5) {
             order.setStatus(Status.CANCELLED);
 
-            // BUY only blocks money (no asset blocked). Refund at final cancel:
             if (order.getOrderSide() == Side.BUY) {
                 BigDecimal refund = nvl(order.getSize()).multiply(price);
                 customer.setCredit(nvl(customer.getCredit()).add(refund));

@@ -44,6 +44,14 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/listall")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<OrderListDto> listAllOrders() {
+
+        OrderListDto response = orderService.listAllOrders();
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/show/{id}")
     @PreAuthorize("hasRole('ADMIN') or #id == authentication.principal.id")
     public ResponseEntity<OrderDetailDto> findOrder(

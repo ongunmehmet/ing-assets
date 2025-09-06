@@ -119,6 +119,33 @@ class StdOrderServiceImpTest {
     }
 
     @Test
+    void listOrders_shouldReturnOrderDetailDtos() {
+        var customerId = 1L;
+        var asset = TestUtils.asset("GPU", BigDecimal.valueOf(5), BigDecimal.valueOf(3000));
+        var customer = TestUtils.customer("Alice", "Dev");
+
+        var today = new Date();
+        var order1 = TestUtils.order(customer, asset, Side.SELL, BigDecimal.ONE, today);
+        order1.setId(101L);
+        var order2 = TestUtils.order(customer, asset, Side.BUY, BigDecimal.valueOf(2), today);
+        order2.setId(102L);
+
+        when(orderRepository.findAll())
+                .thenReturn(List.of(order1, order2));
+
+        OrderListDto response = orderService.listAllOrders();
+
+        assertNotNull(response);
+        assertEquals(2, response.orders().size());
+
+        OrderDetailDto first = response.orders().getFirst();
+        assertEquals(101L, first.id());
+        assertEquals("GPU", first.asset().assetName());
+        assertEquals(Side.SELL, first.side());
+        assertEquals(Status.PENDING, first.status());
+    }
+
+    @Test
     void deleteOrder_shouldSucceed_whenPendingBuyOrder() {
         var asset = TestUtils.asset("Monitor", BigDecimal.valueOf(2), BigDecimal.valueOf(500));
         var customer = TestUtils.customer("Test", "User");
